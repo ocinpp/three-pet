@@ -104,6 +104,13 @@ Your pet shows different moods with unique colors:
 - **Pinia** (v2.2.8) - Type-safe state management
 - **TypeScript** - Type-safe development
 
+### Code Quality
+- **ESLint** (v9.39.2) - Code linting with flat config
+- **Prettier** (v3.8.1) - Code formatting
+- **vue-eslint-parser** - Vue 3 + TypeScript parsing
+- **eslint-plugin-vue** - Vue-specific linting rules
+- **typescript-eslint** - TypeScript linting support
+
 ### 3D Graphics
 - **Three.js** (v0.173.0) - 3D rendering engine
   - WebGLRenderer for hardware acceleration
@@ -198,9 +205,46 @@ npm run build
 
 # Preview production build
 npm run preview
+
+# Run linter with auto-fix
+npm run lint
+
+# Format code with Prettier
+npm run format
 ```
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## 🧹 Code Quality
+
+### Linting & Formatting
+
+This project uses **ESLint** and **Prettier** to maintain consistent code quality.
+
+#### ESLint
+- Flat config format (ESLint 9+)
+- Vue 3 + TypeScript support
+- Auto-fixes issues on run
+- Config: `eslint.config.js`
+
+#### Prettier
+- Single quotes, no semicolons (Vue style)
+- 100 character line width
+- Automatic formatting on save in VSCode
+- Config: `.prettierrc.json`
+
+#### VSCode Integration
+The project includes recommended VSCode settings:
+- Auto-format on save
+- ESLint auto-fix on save
+- Recommended extensions auto-prompt
+
+### Code Style Guidelines
+- Use Vue Composition API with `<script setup lang="ts">`
+- Prefix unused variables with underscore (`_`)
+- Prefer `const` over `let`, avoid `var`
+- Use TypeScript for type safety
+- Follow Vue 3 style guide
 
 ## ⚙️ Customization
 

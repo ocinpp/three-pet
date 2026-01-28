@@ -11,7 +11,11 @@
         <div class="stage-badge" :class="petStore.lifeStage">
           {{ getStageEmoji() }} {{ capitalize(petStore.lifeStage) }}
         </div>
-        <div v-if="petStore.evolutionType && petStore.lifeStage !== 'egg'" class="evolution-badge" :class="petStore.evolutionType">
+        <div
+          v-if="petStore.evolutionType && petStore.lifeStage !== 'egg'"
+          class="evolution-badge"
+          :class="petStore.evolutionType"
+        >
           {{ getEvolutionLabel() }}
         </div>
         <div class="time-badge" :class="currentTimeOfDay" @click="cycleTimeOfDay">
@@ -26,7 +30,10 @@
           <div class="stat-bar-bg">
             <div
               class="stat-bar-fill"
-              :style="{ width: petStore.hunger + '%', backgroundColor: getBarColor(petStore.hunger) }"
+              :style="{
+                width: petStore.hunger + '%',
+                backgroundColor: getBarColor(petStore.hunger),
+              }"
             />
           </div>
           <span class="stat-value">{{ Math.round(petStore.hunger) }}%</span>
@@ -37,7 +44,10 @@
           <div class="stat-bar-bg">
             <div
               class="stat-bar-fill"
-              :style="{ width: petStore.happiness + '%', backgroundColor: getBarColor(petStore.happiness) }"
+              :style="{
+                width: petStore.happiness + '%',
+                backgroundColor: getBarColor(petStore.happiness),
+              }"
             />
           </div>
           <span class="stat-value">{{ Math.round(petStore.happiness) }}%</span>
@@ -46,10 +56,7 @@
         <div class="stat-row">
           <span class="stat-label">Energy</span>
           <div class="stat-bar-bg">
-            <div
-              class="stat-bar-fill energy"
-              :style="{ width: petStore.energy + '%' }"
-            />
+            <div class="stat-bar-fill energy" :style="{ width: petStore.energy + '%' }" />
           </div>
           <span class="stat-value">{{ Math.round(petStore.energy) }}%</span>
         </div>
@@ -57,10 +64,7 @@
         <div class="stat-row">
           <span class="stat-label">Health</span>
           <div class="stat-bar-bg">
-            <div
-              class="stat-bar-fill health"
-              :style="{ width: petStore.health + '%' }"
-            />
+            <div class="stat-bar-fill health" :style="{ width: petStore.health + '%' }" />
           </div>
           <span class="stat-value">{{ Math.round(petStore.health) }}%</span>
         </div>
@@ -120,11 +124,7 @@
           <span>{{ petStore.isSleeping ? 'Wake' : 'Sleep' }}</span>
         </button>
 
-        <button
-          v-if="!petStore.isAlive"
-          @click="petStore.revive()"
-          class="action-btn revive"
-        >
+        <button v-if="!petStore.isAlive" @click="petStore.revive()" class="action-btn revive">
           <span class="btn-icon">💖</span>
           <span>Revive</span>
         </button>
@@ -157,20 +157,25 @@ let timeUpdateInterval: number | null = null
 function getTimeOfDay(): TimeOfDay {
   const hour = new Date().getHours()
 
-  if (hour >= 6 && hour < 11) return 'morning'    // 6am - 11am
+  if (hour >= 6 && hour < 11) return 'morning' // 6am - 11am
   if (hour >= 11 && hour < 16) return 'afternoon' // 11am - 4pm
-  if (hour >= 16 && hour < 19) return 'evening'   // 4pm - 7pm
-  return 'night'                                     // 7pm - 6am
+  if (hour >= 16 && hour < 19) return 'evening' // 4pm - 7pm
+  return 'night' // 7pm - 6am
 }
 
 // Get emoji for time of day
 function getTimeOfDayEmoji(): string {
   switch (currentTimeOfDay.value) {
-    case 'morning': return '🌅'
-    case 'afternoon': return '☀️'
-    case 'evening': return '🌆'
-    case 'night': return '🌙'
-    default: return '☀️'
+    case 'morning':
+      return '🌅'
+    case 'afternoon':
+      return '☀️'
+    case 'evening':
+      return '🌆'
+    case 'night':
+      return '🌙'
+    default:
+      return '☀️'
   }
 }
 
@@ -225,12 +230,18 @@ function getStatusMessage(): string {
 
 function getStageEmoji(): string {
   switch (petStore.lifeStage) {
-    case 'egg': return '🥚'
-    case 'baby': return '🐣'
-    case 'child': return '🐥'
-    case 'adult': return '🐔'
-    case 'elder': return '🦄'
-    default: return '❓'
+    case 'egg':
+      return '🥚'
+    case 'baby':
+      return '🐣'
+    case 'child':
+      return '🐥'
+    case 'adult':
+      return '🐔'
+    case 'elder':
+      return '🦄'
+    default:
+      return '❓'
   }
 }
 
@@ -240,11 +251,16 @@ function capitalize(str: string): string {
 
 function getEvolutionLabel(): string {
   switch (petStore.evolutionType) {
-    case 'perfect': return '⭐ Perfect Care!'
-    case 'good': return '💖 Well Cared For'
-    case 'normal': return '👍 Normal Growth'
-    case 'bad': return '😔 Neglected'
-    default: return ''
+    case 'perfect':
+      return '⭐ Perfect Care!'
+    case 'good':
+      return '💖 Well Cared For'
+    case 'normal':
+      return '👍 Normal Growth'
+    case 'bad':
+      return '😔 Neglected'
+    default:
+      return ''
   }
 }
 </script>
@@ -351,7 +367,9 @@ function getEvolutionLabel(): string {
   font-weight: 500;
   font-size: 0.75rem;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   user-select: none;
 }
 
@@ -410,7 +428,9 @@ function getEvolutionLabel(): string {
 
 .stat-bar-fill {
   height: 100%;
-  transition: width 0.5s ease, background-color 0.5s ease;
+  transition:
+    width 0.5s ease,
+    background-color 0.5s ease;
   border-radius: 12px;
 }
 
@@ -484,7 +504,9 @@ function getEvolutionLabel(): string {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .notification-btn:hover {
@@ -514,7 +536,9 @@ function getEvolutionLabel(): string {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .action-btn:hover:not(:disabled) {

@@ -9,7 +9,7 @@ import {
   ACTIONS,
   HATCHING,
   POOP,
-  SLEEP
+  SLEEP,
 } from '../constants/pet'
 
 export const usePetStore = defineStore('pet', () => {
@@ -47,7 +47,7 @@ export const usePetStore = defineStore('pet', () => {
     sad: 0,
     dirty: 0,
     dead: 0,
-    evolved: 0
+    evolved: 0,
   })
 
   let tickInterval: number | null = null
@@ -98,7 +98,7 @@ export const usePetStore = defineStore('pet', () => {
         body,
         icon: '/favicon.ico',
         badge: '/favicon.ico',
-        tag: type // Prevents duplicate notifications
+        tag: type, // Prevents duplicate notifications
       })
       lastNotificationTime.value[type] = now
     }
@@ -112,23 +112,43 @@ export const usePetStore = defineStore('pet', () => {
     }
 
     if (health.value < THRESHOLDS.HEALTH_LOW) {
-      sendNotification('sick', '🤒 Your Pet is Sick!', `Health: ${Math.round(health.value)}% - Please take care!`)
+      sendNotification(
+        'sick',
+        '🤒 Your Pet is Sick!',
+        `Health: ${Math.round(health.value)}% - Please take care!`
+      )
     }
 
     if (hunger.value < THRESHOLDS.HUNGER_HIGH) {
-      sendNotification('hungry', '😋 Your Pet is Hungry!', `Hunger: ${Math.round(hunger.value)}% - Time to feed!`)
+      sendNotification(
+        'hungry',
+        '😋 Your Pet is Hungry!',
+        `Hunger: ${Math.round(hunger.value)}% - Time to feed!`
+      )
     }
 
     if (energy.value < THRESHOLDS.ENERGY_LOW && !isSleeping.value) {
-      sendNotification('sleepy', '😴 Your Pet is Sleepy', `Energy: ${Math.round(energy.value)}% - Let them rest!`)
+      sendNotification(
+        'sleepy',
+        '😴 Your Pet is Sleepy',
+        `Energy: ${Math.round(energy.value)}% - Let them rest!`
+      )
     }
 
     if (happiness.value < THRESHOLDS.HAPPINESS_LOW) {
-      sendNotification('sad', '😢 Your Pet is Sad', `Happiness: ${Math.round(happiness.value)}% - Play with them!`)
+      sendNotification(
+        'sad',
+        '😢 Your Pet is Sad',
+        `Happiness: ${Math.round(happiness.value)}% - Play with them!`
+      )
     }
 
     if (poopCount.value >= 2) {
-      sendNotification('dirty', '🤢 Your Pet Needs Cleaning!', `${poopCount.value} poop(s) - Clean up time!`)
+      sendNotification(
+        'dirty',
+        '🤢 Your Pet Needs Cleaning!',
+        `${poopCount.value} poop(s) - Clean up time!`
+      )
     }
   }
 
@@ -147,7 +167,7 @@ export const usePetStore = defineStore('pet', () => {
       poopCount: poopCount.value,
       totalCareScore: totalCareScore.value,
       careSamples: careSamples.value,
-      lastActiveTime: lastActiveTime.value
+      lastActiveTime: lastActiveTime.value,
     }
     localStorage.setItem('three-pet-state', JSON.stringify(state))
   }
@@ -221,7 +241,7 @@ export const usePetStore = defineStore('pet', () => {
     hunger.value = Math.min(100, hunger.value + ACTIONS.FEED_HUNGER)
     happiness.value = Math.min(100, happiness.value + ACTIONS.FEED_HAPPINESS)
     currentAction.value = 'eating'
-    setTimeout(() => currentAction.value = 'idle', ACTIONS.ACTION_DURATION)
+    setTimeout(() => (currentAction.value = 'idle'), ACTIONS.ACTION_DURATION)
   }
 
   function play() {
@@ -231,7 +251,7 @@ export const usePetStore = defineStore('pet', () => {
     happiness.value = Math.min(100, happiness.value + ACTIONS.PLAY_HAPPINESS)
     hunger.value = Math.max(0, hunger.value - ACTIONS.PLAY_HUNGER_COST)
     currentAction.value = 'playing'
-    setTimeout(() => currentAction.value = 'idle', ACTIONS.ACTION_DURATION)
+    setTimeout(() => (currentAction.value = 'idle'), ACTIONS.ACTION_DURATION)
   }
 
   function sleep() {
@@ -351,7 +371,11 @@ export const usePetStore = defineStore('pet', () => {
     }
 
     // Health decreases if needs are neglected
-    if (hunger.value < THRESHOLDS.HUNGER_LOW || happiness.value < THRESHOLDS.HAPPINESS_LOW || energy.value < THRESHOLDS.ENERGY_LOW) {
+    if (
+      hunger.value < THRESHOLDS.HUNGER_LOW ||
+      happiness.value < THRESHOLDS.HAPPINESS_LOW ||
+      energy.value < THRESHOLDS.ENERGY_LOW
+    ) {
       health.value = Math.max(0, health.value - DECAY_RATES.HEALTH_DECAY)
     } else {
       health.value = Math.min(100, health.value + DECAY_RATES.HEALTH_REGEN)
@@ -459,6 +483,6 @@ export const usePetStore = defineStore('pet', () => {
     sleep,
     clean,
     revive,
-    requestNotificationPermission
+    requestNotificationPermission,
   }
 })

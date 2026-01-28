@@ -20,6 +20,61 @@ npm run build
 
 # Preview production build
 npm run preview
+
+# Run linter with auto-fix
+npm run lint
+
+# Format code with Prettier
+npm run format
+```
+
+## Code Quality Standards
+
+### Linting & Formatting
+This project uses ESLint 9+ (flat config) and Prettier for consistent code quality.
+
+#### Before Committing
+Always run:
+```bash
+npm run lint    # Check and fix linting issues
+npm run format  # Format all files
+```
+
+#### ESLint Configuration
+- Config file: `eslint.config.js`
+- Vue 3 + TypeScript support via `vue-eslint-parser`
+- Prettier integration (runs as part of ESLint)
+- Auto-fixes enabled
+- Unused variables must be prefixed with `_` (e.g., `_unusedVar`)
+
+#### Prettier Configuration
+- Config file: `.prettierrc.json`
+- Single quotes, no semicolons (Vue community style)
+- 100 character line width
+- ES5 trailing commas
+- LF line endings
+
+#### VSCode Setup
+- `.vscode/settings.json` - Auto-format on save, ESLint integration
+- `.vscode/extensions.json` - Recommended extensions
+- Install Prettier and ESLint extensions for best experience
+
+#### Code Style Rules
+1. **Vue Components**: Use `<script setup lang="ts">` syntax
+2. **TypeScript**: Strict typing, avoid `any` when possible
+3. **Variables**: Use `const` by default, `let` only when necessary
+4. **Naming**: camelCase for variables/funcs, PascalCase for components
+5. **Imports**: Order: Vue libs → External libs → Internal modules
+6. **Unused variables**: Prefix with `_` to satisfy linter
+
+### Pre-commit Workflow
+```bash
+# Make sure code is clean before committing
+npm run lint && npm run format
+
+# Then commit your changes
+git add .
+git commit -m "Your message"
 ```
 
 ## Architecture
