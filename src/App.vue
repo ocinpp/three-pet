@@ -45,6 +45,15 @@
             </div>
           </div>
 
+          <!-- Status Display -->
+          <div class="status-display" :class="petStore.mood">
+            <div class="status-icon">{{ getStatusIcon() }}</div>
+            <div class="status-content">
+              <span class="status-title">{{ getStatusTitle() }}</span>
+              <span class="status-message">{{ getStatusMessage() }}</span>
+            </div>
+          </div>
+
           <!-- Stats Panel -->
           <div class="stats-panel">
             <div class="panel-header">
@@ -140,15 +149,6 @@
                   }}</span>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Status Display -->
-          <div class="status-display" :class="petStore.mood">
-            <div class="status-icon">{{ getStatusIcon() }}</div>
-            <div class="status-content">
-              <span class="status-title">{{ getStatusTitle() }}</span>
-              <span class="status-message">{{ getStatusMessage() }}</span>
             </div>
           </div>
 
@@ -737,7 +737,6 @@ function formatAge(seconds: number): string {
   background: var(--color-bg-secondary);
 }
 
-
 .scene-viewport {
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -840,7 +839,7 @@ function formatAge(seconds: number): string {
 
 /* Stats Panel */
 .stats-panel {
-  padding: 16px 0;
+  padding: 12px 0 0 0;
   border-top: 1px solid var(--color-border);
 }
 
@@ -848,7 +847,7 @@ function formatAge(seconds: number): string {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .panel-title {
@@ -871,11 +870,11 @@ function formatAge(seconds: number): string {
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 8px;
 }
 
 .stat-card {
-  padding: 12px;
+  padding: 10px;
   background: var(--color-bg-primary);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
@@ -954,12 +953,58 @@ function formatAge(seconds: number): string {
   transition: width 0.5s ease;
 }
 
-.stat-card.stat-warning .stat-bar-fill {
-  background: linear-gradient(90deg, #d97706, var(--color-warning));
+/* Hunger bar - orange */
+.stat-card:nth-child(1) .stat-bar-fill {
+  background: linear-gradient(90deg, #f97316, #fbbf24);
 }
 
-.stat-card.stat-critical .stat-bar-fill {
-  background: linear-gradient(90deg, #dc2626, var(--color-error));
+/* Happiness bar - pink */
+.stat-card:nth-child(2) .stat-bar-fill {
+  background: linear-gradient(90deg, #ec4899, #f472b6);
+}
+
+/* Energy bar - yellow */
+.stat-card:nth-child(3) .stat-bar-fill {
+  background: linear-gradient(90deg, #eab308, #facc15);
+}
+
+/* Health bar - red */
+.stat-card:nth-child(4) .stat-bar-fill {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+/* Warning state - intensify base colors */
+.stat-card.stat-warning:nth-child(1) .stat-bar-fill {
+  background: linear-gradient(90deg, #ea580c, #f97316);
+}
+
+.stat-card.stat-warning:nth-child(2) .stat-bar-fill {
+  background: linear-gradient(90deg, #db2777, #ec4899);
+}
+
+.stat-card.stat-warning:nth-child(3) .stat-bar-fill {
+  background: linear-gradient(90deg, #ca8a04, #eab308);
+}
+
+.stat-card.stat-warning:nth-child(4) .stat-bar-fill {
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+}
+
+/* Critical state - even more intense */
+.stat-card.stat-critical:nth-child(1) .stat-bar-fill {
+  background: linear-gradient(90deg, #c2410c, #ea580c);
+}
+
+.stat-card.stat-critical:nth-child(2) .stat-bar-fill {
+  background: linear-gradient(90deg, #be185d, #db2777);
+}
+
+.stat-card.stat-critical:nth-child(3) .stat-bar-fill {
+  background: linear-gradient(90deg, #a16207, #ca8a04);
+}
+
+.stat-card.stat-critical:nth-child(4) .stat-bar-fill {
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
 }
 
 .stat-bar-glow {
@@ -1010,8 +1055,8 @@ function formatAge(seconds: number): string {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 0;
-  margin: 0;
+  padding: 12px 0;
+  margin-top: 0;
   background: var(--color-bg-primary);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
@@ -1140,7 +1185,7 @@ function formatAge(seconds: number): string {
 @media (min-width: 769px) {
   .control-panel {
     border-top: none;
-    padding: 0;
+    padding: 16px 0 0 0;
   }
 }
 
@@ -1428,7 +1473,7 @@ function formatAge(seconds: number): string {
   }
 
   .stats-panel {
-    padding: 8px 0;
+    padding: 8px 0 6px 0;
   }
 
   .panel-header {
@@ -1444,7 +1489,7 @@ function formatAge(seconds: number): string {
   }
 
   .stats-grid {
-    gap: 4px;
+    gap: 6px;
   }
 
   .stat-card {
@@ -1478,7 +1523,7 @@ function formatAge(seconds: number): string {
   }
 
   .status-display {
-    margin: 0;
+    margin-top: 0;
     padding: 8px 10px;
   }
 
