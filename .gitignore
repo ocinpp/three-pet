@@ -66,3 +66,4 @@ coverage
 claude-session*.json
 .ai-prompts
 .ai-responses
+.agents/

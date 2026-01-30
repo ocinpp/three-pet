@@ -1,140 +1,316 @@
 <template>
   <div class="app-container">
-    <div class="game-card">
-      <h1 class="title">Three Pet</h1>
+    <div class="device-frame">
+      <!-- CRT Scanline Effect Overlay -->
+      <div class="scanlines" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
 
-      <!-- 3D Scene -->
-      <PetScene class="scene-container" :time-of-day="currentTimeOfDay" />
+      <!-- Device Header -->
+      <header class="device-header">
+        <div class="header-indicators">
+          <span class="indicator-dot active" aria-label="Device On"></span>
+          <span class="indicator-label">THREE<span class="accent">PET</span>_LAB v1.0</span>
+        </div>
+        <div class="time-display">
+          <span class="time-icon">{{ getTimeOfDayIcon() }}</span>
+          <span class="time-text" @click="cycleTimeOfDay" :title="currentTimeOfDay">
+            {{ formatTimeDisplay() }}
+          </span>
+        </div>
+      </header>
 
-      <!-- Life Stage Display -->
-      <div class="life-stage-display">
-        <div class="stage-badge" :class="petStore.lifeStage">
-          {{ getStageEmoji() }} {{ capitalize(petStore.lifeStage) }}
+      <!-- Device Content Grid -->
+      <div class="device-content">
+        <!-- Left Column: Scene & Stats -->
+        <div class="main-column">
+          <!-- Main Viewport -->
+          <div class="viewport">
+            <PetScene class="scene-viewport" :time-of-day="currentTimeOfDay" />
+
+            <!-- Floating Status Badges -->
+            <div class="status-badges">
+              <div class="badge stage-badge" :class="petStore.lifeStage">
+                <span class="badge-icon">{{ getStageIcon() }}</span>
+                <span class="badge-text">{{ capitalize(petStore.lifeStage) }}</span>
+              </div>
+
+              <div
+                v-if="petStore.evolutionType && petStore.lifeStage !== 'egg'"
+                class="badge evolution-badge"
+                :class="petStore.evolutionType"
+              >
+                <span class="badge-icon">{{ getEvolutionIcon() }}</span>
+                <span class="badge-text">{{ getEvolutionLabel() }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Panel -->
+          <div class="stats-panel">
+            <div class="panel-header">
+              <span class="panel-title">📊 METRICS</span>
+              <span class="panel-subtitle">MONITORING SYSTEM</span>
+            </div>
+
+            <div class="stats-grid">
+              <div
+                class="stat-card"
+                :class="{
+                  'stat-warning': getStatLevel(petStore.hunger) === 'low',
+                  'stat-critical': getStatLevel(petStore.hunger) === 'critical',
+                }"
+              >
+                <div class="stat-header">
+                  <span class="stat-icon">🍖</span>
+                  <span class="stat-name">Hunger</span>
+                </div>
+                <div class="stat-bar-container">
+                  <div class="stat-bar" :style="{ '--stat-width': petStore.hunger + '%' }">
+                    <div class="stat-bar-fill"></div>
+                    <div class="stat-bar-glow"></div>
+                  </div>
+                  <span class="stat-value stat-value-mobile">{{
+                    Math.round(petStore.hunger)
+                  }}</span>
+                </div>
+              </div>
+
+              <div
+                class="stat-card"
+                :class="{
+                  'stat-warning': getStatLevel(petStore.happiness) === 'low',
+                  'stat-critical': getStatLevel(petStore.happiness) === 'critical',
+                }"
+              >
+                <div class="stat-header">
+                  <span class="stat-icon">✨</span>
+                  <span class="stat-name">Happiness</span>
+                </div>
+                <div class="stat-bar-container">
+                  <div class="stat-bar" :style="{ '--stat-width': petStore.happiness + '%' }">
+                    <div class="stat-bar-fill"></div>
+                    <div class="stat-bar-glow"></div>
+                  </div>
+                  <span class="stat-value stat-value-mobile">{{
+                    Math.round(petStore.happiness)
+                  }}</span>
+                </div>
+              </div>
+
+              <div
+                class="stat-card"
+                :class="{
+                  'stat-warning': getStatLevel(petStore.energy) === 'low',
+                  'stat-critical': getStatLevel(petStore.energy) === 'critical',
+                }"
+              >
+                <div class="stat-header">
+                  <span class="stat-icon">⚡</span>
+                  <span class="stat-name">Energy</span>
+                </div>
+                <div class="stat-bar-container">
+                  <div class="stat-bar" :style="{ '--stat-width': petStore.energy + '%' }">
+                    <div class="stat-bar-fill"></div>
+                    <div class="stat-bar-glow"></div>
+                  </div>
+                  <span class="stat-value stat-value-mobile">{{
+                    Math.round(petStore.energy)
+                  }}</span>
+                </div>
+              </div>
+
+              <div
+                class="stat-card"
+                :class="{
+                  'stat-warning': getStatLevel(petStore.health) === 'low',
+                  'stat-critical': getStatLevel(petStore.health) === 'critical',
+                }"
+              >
+                <div class="stat-header">
+                  <span class="stat-icon">❤️</span>
+                  <span class="stat-name">Health</span>
+                </div>
+                <div class="stat-bar-container">
+                  <div class="stat-bar" :style="{ '--stat-width': petStore.health + '%' }">
+                    <div class="stat-bar-fill"></div>
+                    <div class="stat-bar-glow"></div>
+                  </div>
+                  <span class="stat-value stat-value-mobile">{{
+                    Math.round(petStore.health)
+                  }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Display -->
+          <div class="status-display" :class="petStore.mood">
+            <div class="status-icon">{{ getStatusIcon() }}</div>
+            <div class="status-content">
+              <span class="status-title">{{ getStatusTitle() }}</span>
+              <span class="status-message">{{ getStatusMessage() }}</span>
+            </div>
+          </div>
+
+          <!-- Notification Request -->
+          <div
+            v-if="!petStore.notificationEnabled && canRequestNotification()"
+            class="notification-prompt"
+          >
+            <button @click="requestNotificationPermission" class="notification-btn">
+              <span class="btn-icon">🔔</span>
+              <span class="btn-text">Enable Alerts</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
         </div>
-        <div
-          v-if="petStore.evolutionType && petStore.lifeStage !== 'egg'"
-          class="evolution-badge"
-          :class="petStore.evolutionType"
-        >
-          {{ getEvolutionLabel() }}
-        </div>
-        <div class="time-badge" :class="currentTimeOfDay" @click="cycleTimeOfDay">
-          {{ getTimeOfDayEmoji() }} {{ capitalize(currentTimeOfDay) }}
+        <!-- Right Column: Controls -->
+        <div class="sidebar-column">
+          <!-- Control Panel -->
+          <div class="control-panel">
+            <div class="panel-header">
+              <span class="panel-title">🎮 CONTROLS</span>
+              <span class="panel-subtitle">INTERACTION SYSTEM</span>
+            </div>
+
+            <div class="actions-grid">
+              <button
+                @click="petStore.feed()"
+                :disabled="!petStore.isAlive || petStore.isSleeping"
+                class="control-btn feed-btn"
+                :class="{ 'btn-pressed': lastAction === 'feed' }"
+                @mousedown="lastAction = 'feed'"
+                @mouseup="lastAction = null"
+                @mouseleave="lastAction = null"
+              >
+                <div class="btn-inner">
+                  <span class="btn-icon">🍖</span>
+                  <span class="btn-label">Feed</span>
+                  <span class="btn-hint">+Hunger</span>
+                </div>
+              </button>
+
+              <button
+                @click="petStore.play()"
+                :disabled="!petStore.isAlive || petStore.isSleeping"
+                class="control-btn play-btn"
+                :class="{ 'btn-pressed': lastAction === 'play' }"
+                @mousedown="lastAction = 'play'"
+                @mouseup="lastAction = null"
+                @mouseleave="lastAction = null"
+              >
+                <div class="btn-inner">
+                  <span class="btn-icon">🎮</span>
+                  <span class="btn-label">Play</span>
+                  <span class="btn-hint">+Happy</span>
+                </div>
+              </button>
+
+              <button
+                @click="petStore.clean()"
+                :disabled="!petStore.isAlive || petStore.isSleeping || petStore.poopCount === 0"
+                class="control-btn clean-btn"
+                :class="{
+                  'btn-pressed': lastAction === 'clean',
+                  'btn-disabled': petStore.poopCount === 0,
+                }"
+                @mousedown="lastAction = 'clean'"
+                @mouseup="lastAction = null"
+                @mouseleave="lastAction = null"
+              >
+                <div class="btn-inner">
+                  <span class="btn-icon">🧹</span>
+                  <span class="btn-label">Clean</span>
+                  <span class="btn-hint" v-if="petStore.poopCount > 0">{{
+                    petStore.poopCount
+                  }}</span>
+                  <span class="btn-hint" v-else>Done</span>
+                </div>
+              </button>
+
+              <button
+                @click="petStore.sleep()"
+                :disabled="!petStore.isAlive"
+                class="control-btn sleep-btn"
+                :class="{
+                  'btn-active': petStore.isSleeping,
+                  'btn-pressed': lastAction === 'sleep',
+                }"
+                @mousedown="lastAction = 'sleep'"
+                @mouseup="lastAction = null"
+                @mouseleave="lastAction = null"
+              >
+                <div class="btn-inner">
+                  <span class="btn-icon">{{ petStore.isSleeping ? '⏰' : '😴' }}</span>
+                  <span class="btn-label">{{ petStore.isSleeping ? 'Wake' : 'Sleep' }}</span>
+                  <span class="btn-hint">{{ petStore.isSleeping ? 'zZZ' : 'Rest' }}</span>
+                </div>
+              </button>
+
+              <button
+                v-if="!petStore.isAlive"
+                @click="petStore.revive()"
+                class="control-btn revive-btn full-width"
+                :class="{ 'btn-pressed': lastAction === 'revive' }"
+                @mousedown="lastAction = 'revive'"
+                @mouseup="lastAction = null"
+                @mouseleave="lastAction = null"
+              >
+                <div class="btn-inner">
+                  <span class="btn-icon">💖</span>
+                  <span class="btn-label">Revive Pet</span>
+                  <span class="btn-hint">New Life</span>
+                </div>
+              </button>
+            </div>
+
+            <!-- Metrics Panel (Desktop) -->
+            <div class="metrics-panel">
+              <div class="panel-header">
+                <span class="panel-title">📈 STATUS</span>
+                <span class="panel-subtitle">PET INFO</span>
+              </div>
+              <div class="metrics-list">
+                <div class="metric-item">
+                  <span class="metric-label">AGE</span>
+                  <span class="metric-value-large">{{ formatAge(petStore.age) }}</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">MOOD</span>
+                  <span class="metric-value-large mood-badge" :class="petStore.mood">{{
+                    capitalize(petStore.mood)
+                  }}</span>
+                </div>
+                <div class="metric-item" v-if="petStore.isSleeping">
+                  <span class="metric-label">STATE</span>
+                  <span class="metric-value-large sleeping">💤 Sleeping</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Stats -->
-      <div class="stats-container">
-        <div class="stat-row">
-          <span class="stat-label">Hunger</span>
-          <div class="stat-bar-bg">
-            <div
-              class="stat-bar-fill"
-              :style="{
-                width: petStore.hunger + '%',
-                backgroundColor: getBarColor(petStore.hunger),
-              }"
-            />
+      <!-- Footer Info (Mobile only) -->
+      <div class="device-footer device-footer-mobile" v-if="petStore.isAlive">
+        <div class="footer-metrics">
+          <div class="metric">
+            <span class="metric-label">AGE</span>
+            <span class="metric-value">{{ formatAge(petStore.age) }}</span>
           </div>
-          <span class="stat-value">{{ Math.round(petStore.hunger) }}%</span>
-        </div>
-
-        <div class="stat-row">
-          <span class="stat-label">Happiness</span>
-          <div class="stat-bar-bg">
-            <div
-              class="stat-bar-fill"
-              :style="{
-                width: petStore.happiness + '%',
-                backgroundColor: getBarColor(petStore.happiness),
-              }"
-            />
+          <div class="metric-divider"></div>
+          <div class="metric">
+            <span class="metric-label">MOOD</span>
+            <span class="metric-value mood-badge" :class="petStore.mood">{{
+              capitalize(petStore.mood)
+            }}</span>
           </div>
-          <span class="stat-value">{{ Math.round(petStore.happiness) }}%</span>
-        </div>
-
-        <div class="stat-row">
-          <span class="stat-label">Energy</span>
-          <div class="stat-bar-bg">
-            <div class="stat-bar-fill energy" :style="{ width: petStore.energy + '%' }" />
+          <div class="metric-divider" v-if="petStore.isSleeping"></div>
+          <div class="metric" v-if="petStore.isSleeping">
+            <span class="metric-label">STATE</span>
+            <span class="metric-value sleeping">💤</span>
           </div>
-          <span class="stat-value">{{ Math.round(petStore.energy) }}%</span>
         </div>
-
-        <div class="stat-row">
-          <span class="stat-label">Health</span>
-          <div class="stat-bar-bg">
-            <div class="stat-bar-fill health" :style="{ width: petStore.health + '%' }" />
-          </div>
-          <span class="stat-value">{{ Math.round(petStore.health) }}%</span>
-        </div>
-      </div>
-
-      <!-- Status Message -->
-      <div class="status-message" :class="petStore.mood">
-        {{ getStatusMessage() }}
-      </div>
-
-      <!-- Notification Permission -->
-      <button
-        v-if="!petStore.notificationEnabled && canRequestNotification()"
-        @click="requestNotificationPermission"
-        class="notification-btn"
-      >
-        <span class="btn-icon">🔔</span>
-        <span>Enable Notifications</span>
-      </button>
-
-      <!-- Actions -->
-      <div class="actions-container">
-        <button
-          @click="petStore.feed()"
-          :disabled="!petStore.isAlive || petStore.isSleeping"
-          class="action-btn feed"
-        >
-          <span class="btn-icon">🍖</span>
-          <span>Feed</span>
-        </button>
-
-        <button
-          @click="petStore.play()"
-          :disabled="!petStore.isAlive || petStore.isSleeping"
-          class="action-btn play"
-        >
-          <span class="btn-icon">🎮</span>
-          <span>Play</span>
-        </button>
-
-        <button
-          @click="petStore.clean()"
-          :disabled="!petStore.isAlive || petStore.isSleeping || petStore.poopCount === 0"
-          class="action-btn clean"
-        >
-          <span class="btn-icon">🧹</span>
-          <span>Clean {{ petStore.poopCount > 0 ? `(${petStore.poopCount})` : '' }}</span>
-        </button>
-
-        <button
-          @click="petStore.sleep()"
-          :disabled="!petStore.isAlive"
-          class="action-btn sleep"
-          :class="{ active: petStore.isSleeping }"
-        >
-          <span class="btn-icon">{{ petStore.isSleeping ? '⏰' : '😴' }}</span>
-          <span>{{ petStore.isSleeping ? 'Wake' : 'Sleep' }}</span>
-        </button>
-
-        <button v-if="!petStore.isAlive" @click="petStore.revive()" class="action-btn revive">
-          <span class="btn-icon">💖</span>
-          <span>Revive</span>
-        </button>
-      </div>
-
-      <!-- Pet Info -->
-      <div class="pet-info" v-if="petStore.isAlive">
-        <span>Age: {{ petStore.age }}s</span>
-        <span>Mood: {{ petStore.mood }}</span>
-        <span v-if="petStore.isSleeping" class="sleep-indicator">💤 Sleeping</span>
       </div>
     </div>
   </div>
@@ -146,6 +322,7 @@ import { usePetStore } from './stores/petStore'
 import PetScene from './components/PetScene.vue'
 
 const petStore = usePetStore()
+const lastAction = ref<string | null>(null)
 
 // Time of day tracking
 type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night'
@@ -153,18 +330,16 @@ const timesOfDay: TimeOfDay[] = ['morning', 'afternoon', 'evening', 'night']
 const currentTimeOfDay = ref<TimeOfDay>(getTimeOfDay())
 let timeUpdateInterval: number | null = null
 
-// Get current time of day based on hour
 function getTimeOfDay(): TimeOfDay {
   const hour = new Date().getHours()
 
-  if (hour >= 6 && hour < 11) return 'morning' // 6am - 11am
-  if (hour >= 11 && hour < 16) return 'afternoon' // 11am - 4pm
-  if (hour >= 16 && hour < 19) return 'evening' // 4pm - 7pm
-  return 'night' // 7pm - 6am
+  if (hour >= 6 && hour < 11) return 'morning'
+  if (hour >= 11 && hour < 16) return 'afternoon'
+  if (hour >= 16 && hour < 19) return 'evening'
+  return 'night'
 }
 
-// Get emoji for time of day
-function getTimeOfDayEmoji(): string {
+function getTimeOfDayIcon(): string {
   switch (currentTimeOfDay.value) {
     case 'morning':
       return '🌅'
@@ -179,28 +354,32 @@ function getTimeOfDayEmoji(): string {
   }
 }
 
-// Cycle through time of day for testing
+function formatTimeDisplay(): string {
+  const hour = new Date().getHours()
+  const minute = new Date().getMinutes()
+  const period = hour >= 12 ? 'PM' : 'AM'
+  const displayHour = hour % 12 || 12
+  return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`
+}
+
 function cycleTimeOfDay() {
   const currentIndex = timesOfDay.indexOf(currentTimeOfDay.value)
   const nextIndex = (currentIndex + 1) % timesOfDay.length
   currentTimeOfDay.value = timesOfDay[nextIndex]
 }
 
-// Check if browser supports notifications
 function canRequestNotification(): boolean {
   return 'Notification' in window && Notification.permission === 'default'
 }
 
-// Request notification permission
 async function requestNotificationPermission() {
   await petStore.requestNotificationPermission()
 }
 
-// Update time every minute
 onMounted(() => {
   timeUpdateInterval = window.setInterval(() => {
     currentTimeOfDay.value = getTimeOfDay()
-  }, 60000) // Update every minute
+  }, 60000)
 })
 
 onUnmounted(() => {
@@ -209,26 +388,71 @@ onUnmounted(() => {
   }
 })
 
-function getBarColor(value: number): string {
-  if (value > 60) return '#10b981' // green
-  if (value > 30) return '#f59e0b' // orange
-  return '#ef4444' // red
+function getStatLevel(value: number): 'high' | 'medium' | 'low' | 'critical' {
+  if (value > 60) return 'high'
+  if (value > 30) return 'medium'
+  if (value > 15) return 'low'
+  return 'critical'
+}
+
+function getStatusIcon(): string {
+  if (!petStore.isAlive) return '💀'
+  if (petStore.lifeStage === 'egg') return '🥚'
+  if (petStore.isHatching) return '✨'
+  switch (petStore.mood) {
+    case 'happy':
+      return '😊'
+    case 'hungry':
+      return '😋'
+    case 'sick':
+      return '🤒'
+    case 'sleepy':
+      return '😴'
+    case 'sad':
+      return '😢'
+    case 'dirty':
+      return '🤢'
+    default:
+      return '😐'
+  }
+}
+
+function getStatusTitle(): string {
+  if (!petStore.isAlive) return 'SIGNAL LOST'
+  if (petStore.lifeStage === 'egg') return 'INCUBATING'
+  if (petStore.isHatching) return 'EVOLUTION IN PROGRESS'
+  switch (petStore.mood) {
+    case 'happy':
+      return 'OPTIMAL'
+    case 'hungry':
+      return 'REFUELING REQUIRED'
+    case 'sick':
+      return 'MEDICAL ALERT'
+    case 'sleepy':
+      return 'LOW ENERGY'
+    case 'sad':
+      return 'ATTENTION NEEDED'
+    case 'dirty':
+      return 'SANITY WARNING'
+    default:
+      return 'STABLE'
+  }
 }
 
 function getStatusMessage(): string {
-  if (!petStore.isAlive) return '💀 Your pet has passed away...'
-  if (petStore.lifeStage === 'egg') return '🥚 Waiting to hatch...'
-  if (petStore.isHatching) return '✨ Your pet is evolving!'
-  if (petStore.mood === 'happy') return '😊 Your pet is happy!'
-  if (petStore.mood === 'hungry') return '😋 Your pet is hungry!'
-  if (petStore.mood === 'sick') return '🤒 Your pet is not feeling well...'
-  if (petStore.mood === 'sleepy') return '😴 Your pet is sleepy...'
-  if (petStore.mood === 'sad') return '😢 Your pet is feeling sad...'
-  if (petStore.mood === 'dirty') return '🤢 Your pet needs cleaning!'
-  return '😐 Your pet is doing okay'
+  if (!petStore.isAlive) return 'Pet has passed away. Press revive to start anew.'
+  if (petStore.lifeStage === 'egg') return 'Life is forming within... Hatch imminent.'
+  if (petStore.isHatching) return 'Transformation sequence initiating!'
+  if (petStore.mood === 'happy') return 'All systems nominal. Pet thriving.'
+  if (petStore.mood === 'hungry') return 'Nutrients depleted. Initiate feeding protocol.'
+  if (petStore.mood === 'sick') return 'Health critical. Medical care required.'
+  if (petStore.mood === 'sleepy') return 'Energy reserves low. Rest recommended.'
+  if (petStore.mood === 'sad') return 'Emotional stability compromised. Engagement needed.'
+  if (petStore.mood === 'dirty') return 'Environment contaminated. Cleanup required.'
+  return 'Vital signs stable. Continue monitoring.'
 }
 
-function getStageEmoji(): string {
+function getStageIcon(): string {
   switch (petStore.lifeStage) {
     case 'egg':
       return '🥚'
@@ -245,6 +469,21 @@ function getStageEmoji(): string {
   }
 }
 
+function getEvolutionIcon(): string {
+  switch (petStore.evolutionType) {
+    case 'perfect':
+      return '⭐'
+    case 'good':
+      return '💖'
+    case 'normal':
+      return '👍'
+    case 'bad':
+      return '😔'
+    default:
+      return ''
+  }
+}
+
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
@@ -252,356 +491,1100 @@ function capitalize(str: string): string {
 function getEvolutionLabel(): string {
   switch (petStore.evolutionType) {
     case 'perfect':
-      return '⭐ Perfect Care!'
+      return 'Perfect'
     case 'good':
-      return '💖 Well Cared For'
+      return 'Well Cared'
     case 'normal':
-      return '👍 Normal Growth'
+      return 'Normal'
     case 'bad':
-      return '😔 Neglected'
+      return 'Neglected'
     default:
       return ''
   }
 }
+
+function formatAge(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`
+  const minutes = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${minutes}m ${secs}s`
+}
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+/* CSS Variables for Design System */
+:root {
+  --color-bg-primary: #f7f3e8;
+  --color-bg-secondary: #ede4d3;
+  --color-bg-card: #faf8f3;
+  --color-accent: #8b5cf6;
+  --color-accent-light: #a78bfa;
+  --color-accent-dark: #7c3aed;
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #4a4a5e;
+  --color-text-tertiary: #8a8a9e;
+  --color-border: #e5e0d0;
+  --color-border-dark: #d4d0c0;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Space Grotesk', sans-serif;
+}
+
 .app-container {
-  padding: 16px;
-}
-
-.game-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.title {
-  text-align: center;
-  font-size: 1.5rem;
-  color: #667eea;
-  margin-bottom: 12px;
-  font-weight: 700;
-}
-
-.scene-container {
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 12px;
-}
-
-.life-stage-display {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f7f3e8 0%, #ede4d3 50%, #f7f3e8 100%);
+  padding: 20px;
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
+  position: relative;
+  overflow-x: hidden;
 }
 
-.stage-badge {
-  padding: 4px 10px;
-  border-radius: 16px;
-  font-weight: 600;
-  font-size: 0.8rem;
+.app-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.4;
+  z-index: 0;
+}
+
+.device-frame {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    var(--shadow-xl),
+    0 0 0 1px var(--color-border),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  z-index: 1;
+}
+
+@media (min-width: 769px) {
+  .device-frame {
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+  }
+}
+
+.device-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 0 20px;
+}
+
+@media (min-width: 769px) {
+  .device-content {
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    padding: 0 20px 20px;
+  }
+}
+
+.main-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* CRT Effects */
+.scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.02) 0px,
+    rgba(0, 0, 0, 0.02) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.5;
+}
+
+.vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.03) 100%);
+  pointer-events: none;
+  z-index: 9;
+}
+
+/* Device Header */
+.device-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.08) 0%, transparent 100%);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header-indicators {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-text-tertiary);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.indicator-dot.active {
+  background: var(--color-success);
+  box-shadow:
+    0 0 8px var(--color-success),
+    0 0 16px var(--color-success);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.indicator-label {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+}
+
+.indicator-label .accent {
+  color: var(--color-accent);
+}
+
+.time-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.time-icon {
+  font-size: 0.9rem;
+}
+
+.time-text {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+
+.time-text:hover {
+  color: var(--color-accent);
+}
+
+/* Viewport */
+.viewport {
+  position: relative;
+  padding: 16px 0;
+  background: var(--color-bg-secondary);
+}
+
+
+.scene-viewport {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  height: 280px;
+}
+
+@media (min-width: 769px) {
+  .scene-viewport {
+    height: 280px;
+  }
+}
+
+.status-badges {
+  position: absolute;
+  top: 24px;
+  left: 30px;
+  right: 30px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  pointer-events: none;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.badge-icon {
+  font-size: 0.9rem;
+}
+
+.badge-text {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .stage-badge.egg {
   background: linear-gradient(135deg, #fef3c7, #fbbf24);
-  color: #92400e;
 }
 
 .stage-badge.baby {
   background: linear-gradient(135deg, #fce7f3, #f9a8d4);
-  color: #9f1239;
 }
 
 .stage-badge.child {
   background: linear-gradient(135deg, #dbeafe, #60a5fa);
-  color: #1e3a8a;
 }
 
 .stage-badge.adult {
   background: linear-gradient(135deg, #d1fae5, #34d399);
-  color: #065f46;
 }
 
 .stage-badge.elder {
   background: linear-gradient(135deg, #e0e7ff, #818cf8);
-  color: #3730a3;
-}
-
-.evolution-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: 500;
-  font-size: 0.75rem;
 }
 
 .evolution-badge.perfect {
   background: linear-gradient(135deg, #fef08a, #fbbf24);
-  color: #854d0e;
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+  box-shadow: 0 2px 12px rgba(251, 191, 36, 0.5);
 }
 
 .evolution-badge.good {
   background: linear-gradient(135deg, #fce7f3, #f472b6);
-  color: #9f1239;
 }
 
 .evolution-badge.normal {
   background: linear-gradient(135deg, #e5e7eb, #d1d5db);
-  color: #4b5563;
 }
 
 .evolution-badge.bad {
   background: linear-gradient(135deg, #fee2e2, #fca5a5);
-  color: #991b1b;
 }
 
-.time-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: 500;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-  user-select: none;
+/* Stats Panel */
+.stats-panel {
+  padding: 16px 0;
+  border-top: 1px solid var(--color-border);
 }
 
-.time-badge:hover {
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.time-badge.morning {
-  background: linear-gradient(135deg, #fef3c7, #fcd34d);
-  color: #92400e;
-}
-
-.time-badge.afternoon {
-  background: linear-gradient(135deg, #dbeafe, #60a5fa);
-  color: #1e3a8a;
-}
-
-.time-badge.evening {
-  background: linear-gradient(135deg, #fed7aa, #fb923c);
-  color: #9a3412;
-}
-
-.time-badge.night {
-  background: linear-gradient(135deg, #1e3a5f, #0f172a);
-  color: #e2e8f0;
-}
-
-.stats-container {
+.panel-header {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
 }
 
-.stat-row {
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: 0.1em;
+}
+
+.panel-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.stat-card {
+  padding: 12px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  border-color: var(--color-accent-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card.stat-warning {
+  border-color: var(--color-warning);
+  background: linear-gradient(135deg, #fef3c7, #fef9e7);
+}
+
+.stat-card.stat-critical {
+  border-color: var(--color-error);
+  background: linear-gradient(135deg, #fee2e2, #fef2f2);
+  animation: criticalPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes criticalPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+  }
+}
+
+.stat-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.stat-label {
-  font-weight: 600;
-  color: #4b5563;
-  min-width: 65px;
+.stat-icon {
+  font-size: 1rem;
+}
+
+.stat-name {
+  font-family: var(--font-display);
   font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.stat-bar-bg {
+.stat-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-bar {
   flex: 1;
-  height: 18px;
-  background: #e5e7eb;
-  border-radius: 8px;
+  height: 8px;
+  background: var(--color-bg-secondary);
+  border-radius: 4px;
   overflow: hidden;
+  position: relative;
 }
 
 .stat-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100%;
-  transition:
-    width 0.5s ease,
-    background-color 0.5s ease;
-  border-radius: 12px;
+  width: var(--stat-width, 100%);
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-light));
+  border-radius: 4px;
+  transition: width 0.5s ease;
 }
 
-.stat-bar-fill.health {
-  background: linear-gradient(90deg, #10b981, #059669);
+.stat-card.stat-warning .stat-bar-fill {
+  background: linear-gradient(90deg, #d97706, var(--color-warning));
 }
 
-.stat-bar-fill.energy {
-  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+.stat-card.stat-critical .stat-bar-fill {
+  background: linear-gradient(90deg, #dc2626, var(--color-error));
+}
+
+.stat-bar-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .stat-value {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
   min-width: 45px;
   text-align: right;
-  font-weight: 600;
-  color: #4b5563;
-  font-size: 0.9rem;
+}
+
+.stat-value-mobile::after {
+  content: '%';
+}
+
+@media (max-width: 640px) {
+  .stat-value-mobile {
+    min-width: 32px;
+    font-size: 0.7rem;
+  }
+
+  .stat-value-mobile::after {
+    content: '';
+  }
+}
+
+/* Status Display */
+.status-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  margin: 0;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-accent);
+  transition: all 0.3s ease;
+}
+
+.status-display.happy {
+  border-left-color: var(--color-success);
+  background: linear-gradient(135deg, #d1fae5, #ecfdf5);
+}
+
+.status-display.hungry {
+  border-left-color: var(--color-warning);
+  background: linear-gradient(135deg, #fef3c7, #fffbeb);
+}
+
+.status-display.sick {
+  border-left-color: var(--color-error);
+  background: linear-gradient(135deg, #fee2e2, #fef2f2);
+}
+
+.status-display.sleepy {
+  border-left-color: var(--color-info);
+  background: linear-gradient(135deg, #e0e7ff, #eef2ff);
+}
+
+.status-display.sad {
+  border-left-color: var(--color-accent-dark);
+  background: linear-gradient(135deg, #f3e8ff, #faf5ff);
+}
+
+.status-display.dirty {
+  border-left-color: #b45309;
+  background: linear-gradient(135deg, #fef9c3, #fffef0);
+}
+
+.status-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.status-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.status-title {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
 }
 
 .status-message {
-  text-align: center;
-  padding: 8px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.4;
 }
 
-.status-message.happy {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.status-message.hungry {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.status-message.sick {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.status-message.sleepy {
-  background: #e0e7ff;
-  color: #3730a3;
-}
-
-.status-message.sad {
-  background: #f3e8ff;
-  color: #6b21a8;
-}
-
-.status-message.dirty {
-  background: #fef9c3;
-  color: #854d0e;
+/* Notification Prompt */
+.notification-prompt {
+  padding: 12px 0;
 }
 
 .notification-btn {
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #34d399, #10b981);
-  color: white;
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
 }
 
 .notification-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--shadow-lg);
 }
 
 .notification-btn:active {
   transform: translateY(0);
 }
 
-.actions-container {
+.btn-icon {
+  font-size: 1.1rem;
+}
+
+.btn-text {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  flex: 1;
+  text-align: left;
+}
+
+.btn-arrow {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+.notification-btn:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+/* Control Panel */
+.control-panel {
+  padding: 16px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+@media (min-width: 769px) {
+  .control-panel {
+    border-top: none;
+    padding: 0;
+  }
+}
+
+.actions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 8px;
-  margin-bottom: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 
-.action-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 10px;
-  border: none;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 600;
+.control-btn {
+  position: relative;
+  padding: 0;
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  transition: all 0.2s ease;
+  overflow: hidden;
 }
 
-.action-btn:hover:not(:disabled) {
+.control-btn:hover:not(:disabled) {
+  border-color: var(--color-accent-light);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
-.action-btn:active:not(:disabled) {
+.control-btn:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.action-btn:disabled {
+.control-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.action-btn.feed {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: white;
-}
-
-.action-btn.play {
-  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
-  color: white;
-}
-
-.action-btn.revive {
-  background: linear-gradient(135deg, #f472b6, #ec4899);
-  color: white;
-}
-
-.action-btn.clean {
-  background: linear-gradient(135deg, #60a5fa, #3b82f6);
-  color: white;
-}
-
-.action-btn.sleep {
-  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
-  color: white;
-}
-
-.action-btn.sleep.active {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: white;
-}
-
-.btn-icon {
-  font-size: 1.5rem;
-}
-
-.pet-info {
+.btn-inner {
   display: flex;
-  justify-content: space-around;
-  padding: 8px;
-  background: #f3f4f6;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  color: #6b7280;
-  font-weight: 500;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 12px;
 }
 
-.sleep-indicator {
-  color: #8b5cf6;
+.control-btn .btn-icon {
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.control-btn:hover:not(:disabled) .btn-icon {
+  transform: scale(1.1);
+}
+
+.control-btn .btn-label {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.control-btn .btn-hint {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
   font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.control-btn.feed-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-color: #fbbf24;
+}
+
+.control-btn.play-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+  border-color: var(--color-accent-light);
+}
+
+.control-btn.clean-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  border-color: var(--color-info);
+}
+
+.control-btn.sleep-btn {
+  background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+  border-color: var(--color-accent-light);
+}
+
+.control-btn.sleep-btn.btn-active {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-color: #fbbf24;
+}
+
+.control-btn.revive-btn {
+  background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+  border-color: var(--color-error);
+}
+
+.control-btn.revive-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fbcfe8, #f9a8d4);
+}
+
+.control-btn.full-width {
+  grid-column: 1 / -1;
+}
+
+.control-btn.btn-pressed {
+  transform: scale(0.98);
+}
+
+.control-btn.btn-disabled {
+  opacity: 0.4;
+}
+
+/* Metrics Panel (Desktop) */
+.metrics-panel {
+  display: none;
+  padding: 16px 0 0;
+}
+
+@media (min-width: 769px) {
+  .metrics-panel {
+    display: block;
+  }
+}
+
+.metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metric-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.metric-item .metric-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.metric-value-large {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.metric-value-large.mood-badge {
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+  font-size: 0.7rem;
+}
+
+.metric-value-large.sleeping {
+  color: var(--color-info);
+}
+
+/* Device Footer */
+.device-footer {
+  padding: 14px 0;
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (min-width: 769px) {
+  .device-footer.device-footer-mobile {
+    display: none;
+  }
+}
+
+.footer-metrics {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.metric-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.metric-value {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.metric-value.mood-badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-primary);
+  font-size: 0.75rem;
+}
+
+.metric-value.sleeping {
+  font-size: 1.2rem;
+}
+
+.metric-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .app-container {
+    padding: 8px;
+    align-items: flex-start;
+  }
+
+  .device-frame {
+    max-width: 100%;
+  }
+
+  .device-content {
+    padding: 0 12px;
+  }
+
+  .device-header {
+    padding: 8px 12px;
+  }
+
+  .time-display {
+    padding: 4px 8px;
+  }
+
+  .time-icon {
+    font-size: 0.8rem;
+  }
+
+  .time-text {
+    font-size: 0.7rem;
+  }
+
+  .viewport {
+    padding: 8px 0;
+  }
+
+  .scene-viewport {
+    height: 260px;
+  }
+
+  .status-badges {
+    top: 12px;
+    left: 16px;
+    right: 16px;
+  }
+
+  .badge {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+
+  .badge-icon {
+    font-size: 0.8rem;
+  }
+
+  .badge-text {
+    font-size: 0.6rem;
+  }
+
+  .stats-panel {
+    padding: 8px 0;
+  }
+
+  .panel-header {
+    margin-bottom: 6px;
+  }
+
+  .panel-title {
+    font-size: 0.7rem;
+  }
+
+  .panel-subtitle {
+    font-size: 0.6rem;
+  }
+
+  .stats-grid {
+    gap: 4px;
+  }
+
+  .stat-card {
+    padding: 6px 8px;
+  }
+
+  .stat-header {
+    margin-bottom: 4px;
+    gap: 4px;
+  }
+
+  .stat-icon {
+    font-size: 0.85rem;
+  }
+
+  .stat-name {
+    font-size: 0.65rem;
+  }
+
+  .stat-bar-container {
+    gap: 6px;
+  }
+
+  .stat-bar {
+    height: 6px;
+  }
+
+  .stat-value {
+    font-size: 0.7rem;
+    min-width: 32px;
+  }
+
+  .status-display {
+    margin: 0;
+    padding: 8px 10px;
+  }
+
+  .status-icon {
+    font-size: 1.1rem;
+  }
+
+  .status-title {
+    font-size: 0.6rem;
+  }
+
+  .status-message {
+    font-size: 0.7rem;
+  }
+
+  .notification-prompt {
+    padding: 6px 0;
+  }
+
+  .notification-btn {
+    padding: 8px 12px;
+  }
+
+  .notification-btn .btn-icon {
+    font-size: 1rem;
+  }
+
+  .notification-btn .btn-text {
+    font-size: 0.75rem;
+  }
+
+  .notification-btn .btn-arrow {
+    font-size: 0.9rem;
+  }
+
+  .control-panel {
+    padding: 8px 0;
+  }
+
+  .actions-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .btn-inner {
+    padding: 12px 6px;
+    gap: 2px;
+  }
+
+  .control-btn .btn-icon {
+    font-size: 1.5rem;
+  }
+
+  .control-btn .btn-label {
+    display: none;
+  }
+
+  .control-btn .btn-hint {
+    display: none;
+  }
+
+  .control-btn.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .control-btn.full-width .btn-label {
+    display: block;
+    font-size: 0.75rem;
+  }
+
+  .control-btn.full-width .btn-hint {
+    display: block;
+    font-size: 0.6rem;
+  }
+
+  .control-btn.full-width .btn-inner {
+    padding: 10px 12px;
+  }
+
+  .device-footer {
+    padding: 8px 0;
+  }
+
+  .footer-metrics {
+    gap: 8px;
+  }
+
+  .metric-label {
+    font-size: 0.55rem;
+  }
+
+  .metric-value {
+    font-size: 0.75rem;
+  }
+
+  .metric-value.mood-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+  }
+
+  .metric-value.sleeping {
+    font-size: 1rem;
+  }
+
+  .metric-divider {
+    height: 18px;
+  }
 }
 </style>
