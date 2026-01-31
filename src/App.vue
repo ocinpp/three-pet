@@ -112,14 +112,14 @@
           <span class="restart-text">RESET</span>
         </button>
       </div>
+    </div>
 
-      <!-- Revive Button (shown when pet is dead) -->
-      <div v-if="!petStore.isAlive" class="revive-overlay">
-        <button @click="petStore.revive()" class="revive-btn">
-          <span class="revive-icon">💖</span>
-          <span class="revive-text">REVIVE</span>
-        </button>
-      </div>
+    <!-- Revive Overlay (full screen, shown when pet is dead) -->
+    <div v-if="!petStore.isAlive" class="revive-overlay">
+      <button @click="petStore.revive()" class="revive-btn">
+        <span class="revive-icon">💖</span>
+        <span class="revive-text">REVIVE</span>
+      </button>
     </div>
 
     <!-- Notification Prompt (outside device frame) -->
@@ -705,14 +705,13 @@ onUnmounted(() => {
 
 /* Revive Overlay */
 .revive-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  z-index: 10;
+  z-index: 100;
 }
 
 .revive-btn {
