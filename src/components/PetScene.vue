@@ -196,7 +196,7 @@ function createEgg(): THREE.Group {
   crack2.position.set(-v * 0.2, v * 3.8, v * 2.1)
   group.add(crack2)
 
-  group.scale.set(0.7, 0.7, 0.7)
+  group.scale.set(0.4, 0.4, 0.4)
   return group
 }
 
@@ -315,7 +315,7 @@ function createBabyPet(): THREE.Group {
   tuft.position.set(0, v * 1.8, 0)
   group.add(tuft)
 
-  group.scale.set(0.6, 0.6, 0.6)
+  group.scale.set(0.35, 0.35, 0.35)
   return group
 }
 
@@ -482,7 +482,7 @@ function createChildPet(): THREE.Group {
   tuft3.position.set(0, v * 2.9, 0)
   group.add(tuft3)
 
-  group.scale.set(0.75, 0.75, 0.75)
+  group.scale.set(0.45, 0.45, 0.45)
   return group
 }
 
@@ -646,6 +646,7 @@ function createAdultPet(): THREE.Group {
     group.add(tuft)
   }
 
+  group.scale.set(0.5, 0.5, 0.5)
   return group
 }
 
@@ -803,7 +804,7 @@ function createElderPet(): THREE.Group {
   group.add(tuft1)
 
   // Slightly smaller and dignified
-  group.scale.set(0.85, 0.85, 0.85)
+  group.scale.set(0.55, 0.55, 0.55)
 
   return group
 }
@@ -934,7 +935,7 @@ function init() {
 
   // Camera
   camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000)
-  camera.position.set(0, 1, 8)
+  camera.position.set(0, 0, 5)
 
   // Renderer
   renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -965,7 +966,7 @@ function init() {
   const groundMaterial = new THREE.MeshLambertMaterial({ color: groundCurrent })
   ground = new THREE.Mesh(groundGeometry, groundMaterial)
   ground.rotation.x = -Math.PI / 2
-  ground.position.y = -1.5
+  ground.position.y = 0.5
   scene.add(ground)
 
   clock = new THREE.Clock()
@@ -999,7 +1000,7 @@ function init() {
           // Random position on ground
           const x = (Math.random() - 0.5) * 6
           const z = (Math.random() - 0.5) * 2
-          poop.position.set(x, -1.3, z)
+          poop.position.set(x, 0.7, z)
           scene.add(poop)
           poopMeshes.push(poop)
         }
@@ -1076,11 +1077,12 @@ function animate() {
         zzzParticles.push({ zzz, positions, baseY: 2, startTime: time })
       }
     }
-    // Hatching animation
-    else if (petStore.isHatching) {
+    // Hatching animation (only for egg)
+    else if (petStore.isHatching && petStore.lifeStage === 'egg') {
       petGroup.rotation.y += 0.2
-      petGroup.scale.x = 1 + Math.sin(time * 10) * 0.1
-      petGroup.scale.z = 1 + Math.sin(time * 10) * 0.1
+      const baseScale = 0.4
+      const pulse = Math.sin(time * 10) * 0.05
+      petGroup.scale.set(baseScale + pulse, baseScale, baseScale + pulse)
     }
     // Egg wobble
     else if (petStore.lifeStage === 'egg') {
@@ -1174,8 +1176,9 @@ onUnmounted(() => {
 <style scoped>
 .pet-scene {
   width: 100%;
-  height: 280px;
-  border-radius: 16px;
+  height: 100%;
+  border-radius: 6px;
   overflow: hidden;
+  background: #c8f7c5;
 }
 </style>

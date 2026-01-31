@@ -1,33 +1,16 @@
 <template>
   <div class="app-container">
     <div class="device-frame">
-      <!-- CRT Scanline Effect Overlay -->
-      <div class="scanlines" aria-hidden="true"></div>
-      <div class="vignette" aria-hidden="true"></div>
+      <!-- Branding -->
+      <div class="brand-logo">THREE<span class="accent">PET</span></div>
 
-      <!-- Device Header -->
-      <header class="device-header">
-        <div class="header-indicators">
-          <span class="indicator-dot active" aria-label="Device On"></span>
-          <span class="indicator-label">THREE<span class="accent">PET</span>_LAB v1.0</span>
-        </div>
-        <div class="time-display">
-          <span class="time-icon">{{ getTimeOfDayIcon() }}</span>
-          <span class="time-text" @click="cycleTimeOfDay" :title="currentTimeOfDay">
-            {{ formatTimeDisplay() }}
-          </span>
-        </div>
-      </header>
-
-      <!-- Device Content Grid -->
-      <div class="device-content">
-        <!-- Left Column: Scene & Stats -->
-        <div class="main-column">
-          <!-- Main Viewport -->
-          <div class="viewport">
+      <!-- LCD Display -->
+      <div class="lcd-container">
+        <div class="lcd-frame">
+          <div class="lcd-screen">
             <PetScene class="scene-viewport" :time-of-day="currentTimeOfDay" />
 
-            <!-- Floating Status Badges -->
+            <!-- Status Badges (Stage & Evolution) -->
             <div class="status-badges">
               <div class="badge stage-badge" :class="petStore.lifeStage">
                 <span class="badge-icon">{{ getStageIcon() }}</span>
@@ -43,274 +26,104 @@
                 <span class="badge-text">{{ getEvolutionLabel() }}</span>
               </div>
             </div>
-          </div>
 
-          <!-- Status Display -->
-          <div class="status-display" :class="petStore.mood">
-            <div class="status-icon">{{ getStatusIcon() }}</div>
-            <div class="status-content">
-              <span class="status-title">{{ getStatusTitle() }}</span>
-              <span class="status-message">{{ getStatusMessage() }}</span>
-            </div>
-          </div>
-
-          <!-- Stats Panel -->
-          <div class="stats-panel">
-            <div class="panel-header">
-              <span class="panel-title">📊 METRICS</span>
-              <span class="panel-subtitle">MONITORING SYSTEM</span>
-            </div>
-
-            <div class="stats-grid">
+            <!-- Stats Overlay -->
+            <div class="stats-overlay">
               <div
-                class="stat-card"
-                :class="{
-                  'stat-warning': getStatLevel(petStore.hunger) === 'low',
-                  'stat-critical': getStatLevel(petStore.hunger) === 'critical',
-                }"
+                class="stat-badge"
+                :class="{ critical: getStatLevel(petStore.hunger) === 'critical' }"
               >
-                <div class="stat-header">
-                  <span class="stat-icon">🍖</span>
-                  <span class="stat-name">Hunger</span>
-                </div>
-                <div class="stat-bar-container">
-                  <div class="stat-bar" :style="{ '--stat-width': petStore.hunger + '%' }">
-                    <div class="stat-bar-fill"></div>
-                    <div class="stat-bar-glow"></div>
-                  </div>
-                  <span class="stat-value stat-value-mobile">{{
-                    Math.round(petStore.hunger)
-                  }}</span>
-                </div>
+                <span class="stat-icon">🍖</span>
+                <span class="stat-value">{{ Math.round(petStore.hunger) }}%</span>
               </div>
-
               <div
-                class="stat-card"
-                :class="{
-                  'stat-warning': getStatLevel(petStore.happiness) === 'low',
-                  'stat-critical': getStatLevel(petStore.happiness) === 'critical',
-                }"
+                class="stat-badge"
+                :class="{ critical: getStatLevel(petStore.happiness) === 'critical' }"
               >
-                <div class="stat-header">
-                  <span class="stat-icon">✨</span>
-                  <span class="stat-name">Happiness</span>
-                </div>
-                <div class="stat-bar-container">
-                  <div class="stat-bar" :style="{ '--stat-width': petStore.happiness + '%' }">
-                    <div class="stat-bar-fill"></div>
-                    <div class="stat-bar-glow"></div>
-                  </div>
-                  <span class="stat-value stat-value-mobile">{{
-                    Math.round(petStore.happiness)
-                  }}</span>
-                </div>
+                <span class="stat-icon">✨</span>
+                <span class="stat-value">{{ Math.round(petStore.happiness) }}%</span>
               </div>
-
               <div
-                class="stat-card"
-                :class="{
-                  'stat-warning': getStatLevel(petStore.energy) === 'low',
-                  'stat-critical': getStatLevel(petStore.energy) === 'critical',
-                }"
+                class="stat-badge"
+                :class="{ critical: getStatLevel(petStore.energy) === 'critical' }"
               >
-                <div class="stat-header">
-                  <span class="stat-icon">⚡</span>
-                  <span class="stat-name">Energy</span>
-                </div>
-                <div class="stat-bar-container">
-                  <div class="stat-bar" :style="{ '--stat-width': petStore.energy + '%' }">
-                    <div class="stat-bar-fill"></div>
-                    <div class="stat-bar-glow"></div>
-                  </div>
-                  <span class="stat-value stat-value-mobile">{{
-                    Math.round(petStore.energy)
-                  }}</span>
-                </div>
+                <span class="stat-icon">⚡</span>
+                <span class="stat-value">{{ Math.round(petStore.energy) }}%</span>
               </div>
-
               <div
-                class="stat-card"
-                :class="{
-                  'stat-warning': getStatLevel(petStore.health) === 'low',
-                  'stat-critical': getStatLevel(petStore.health) === 'critical',
-                }"
+                class="stat-badge"
+                :class="{ critical: getStatLevel(petStore.health) === 'critical' }"
               >
-                <div class="stat-header">
-                  <span class="stat-icon">❤️</span>
-                  <span class="stat-name">Health</span>
-                </div>
-                <div class="stat-bar-container">
-                  <div class="stat-bar" :style="{ '--stat-width': petStore.health + '%' }">
-                    <div class="stat-bar-fill"></div>
-                    <div class="stat-bar-glow"></div>
-                  </div>
-                  <span class="stat-value stat-value-mobile">{{
-                    Math.round(petStore.health)
-                  }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Notification Request -->
-          <div
-            v-if="!petStore.notificationEnabled && canRequestNotification()"
-            class="notification-prompt"
-          >
-            <button @click="requestNotificationPermission" class="notification-btn">
-              <span class="btn-icon">🔔</span>
-              <span class="btn-text">Enable Alerts</span>
-              <span class="btn-arrow">→</span>
-            </button>
-          </div>
-        </div>
-        <!-- Right Column: Controls -->
-        <div class="sidebar-column">
-          <!-- Control Panel -->
-          <div class="control-panel">
-            <div class="panel-header">
-              <span class="panel-title">🎮 CONTROLS</span>
-              <span class="panel-subtitle">INTERACTION SYSTEM</span>
-            </div>
-
-            <div class="actions-grid">
-              <button
-                @click="petStore.feed()"
-                :disabled="!petStore.isAlive || petStore.isSleeping"
-                class="control-btn feed-btn"
-                :class="{ 'btn-pressed': lastAction === 'feed' }"
-                @mousedown="lastAction = 'feed'"
-                @mouseup="lastAction = null"
-                @mouseleave="lastAction = null"
-              >
-                <div class="btn-inner">
-                  <span class="btn-icon">🍖</span>
-                  <span class="btn-label">Feed</span>
-                  <span class="btn-hint">+Hunger</span>
-                </div>
-              </button>
-
-              <button
-                @click="petStore.play()"
-                :disabled="!petStore.isAlive || petStore.isSleeping"
-                class="control-btn play-btn"
-                :class="{ 'btn-pressed': lastAction === 'play' }"
-                @mousedown="lastAction = 'play'"
-                @mouseup="lastAction = null"
-                @mouseleave="lastAction = null"
-              >
-                <div class="btn-inner">
-                  <span class="btn-icon">🎮</span>
-                  <span class="btn-label">Play</span>
-                  <span class="btn-hint">+Happy</span>
-                </div>
-              </button>
-
-              <button
-                @click="petStore.clean()"
-                :disabled="!petStore.isAlive || petStore.isSleeping || petStore.poopCount === 0"
-                class="control-btn clean-btn"
-                :class="{
-                  'btn-pressed': lastAction === 'clean',
-                  'btn-disabled': petStore.poopCount === 0,
-                }"
-                @mousedown="lastAction = 'clean'"
-                @mouseup="lastAction = null"
-                @mouseleave="lastAction = null"
-              >
-                <div class="btn-inner">
-                  <span class="btn-icon">🧹</span>
-                  <span class="btn-label">Clean</span>
-                  <span class="btn-hint" v-if="petStore.poopCount > 0">{{
-                    petStore.poopCount
-                  }}</span>
-                  <span class="btn-hint" v-else>Done</span>
-                </div>
-              </button>
-
-              <button
-                @click="petStore.sleep()"
-                :disabled="!petStore.isAlive"
-                class="control-btn sleep-btn"
-                :class="{
-                  'btn-active': petStore.isSleeping,
-                  'btn-pressed': lastAction === 'sleep',
-                }"
-                @mousedown="lastAction = 'sleep'"
-                @mouseup="lastAction = null"
-                @mouseleave="lastAction = null"
-              >
-                <div class="btn-inner">
-                  <span class="btn-icon">{{ petStore.isSleeping ? '⏰' : '😴' }}</span>
-                  <span class="btn-label">{{ petStore.isSleeping ? 'Wake' : 'Sleep' }}</span>
-                  <span class="btn-hint">{{ petStore.isSleeping ? 'zZZ' : 'Rest' }}</span>
-                </div>
-              </button>
-
-              <button
-                v-if="!petStore.isAlive"
-                @click="petStore.revive()"
-                class="control-btn revive-btn full-width"
-                :class="{ 'btn-pressed': lastAction === 'revive' }"
-                @mousedown="lastAction = 'revive'"
-                @mouseup="lastAction = null"
-                @mouseleave="lastAction = null"
-              >
-                <div class="btn-inner">
-                  <span class="btn-icon">💖</span>
-                  <span class="btn-label">Revive Pet</span>
-                  <span class="btn-hint">New Life</span>
-                </div>
-              </button>
-            </div>
-
-            <!-- Metrics Panel (Desktop) -->
-            <div class="metrics-panel">
-              <div class="panel-header">
-                <span class="panel-title">📈 STATUS</span>
-                <span class="panel-subtitle">PET INFO</span>
-              </div>
-              <div class="metrics-list">
-                <div class="metric-item">
-                  <span class="metric-label">AGE</span>
-                  <span class="metric-value-large">{{ formatAge(petStore.age) }}</span>
-                </div>
-                <div class="metric-item">
-                  <span class="metric-label">MOOD</span>
-                  <span class="metric-value-large mood-badge" :class="petStore.mood">{{
-                    capitalize(petStore.mood)
-                  }}</span>
-                </div>
-                <div class="metric-item" v-if="petStore.isSleeping">
-                  <span class="metric-label">STATE</span>
-                  <span class="metric-value-large sleeping">💤 Sleeping</span>
-                </div>
+                <span class="stat-icon">❤️</span>
+                <span class="stat-value">{{ Math.round(petStore.health) }}%</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Footer Info (Mobile only) -->
-      <div class="device-footer device-footer-mobile" v-if="petStore.isAlive">
-        <div class="footer-metrics">
-          <div class="metric">
-            <span class="metric-label">AGE</span>
-            <span class="metric-value">{{ formatAge(petStore.age) }}</span>
-          </div>
-          <div class="metric-divider"></div>
-          <div class="metric">
-            <span class="metric-label">MOOD</span>
-            <span class="metric-value mood-badge" :class="petStore.mood">{{
-              capitalize(petStore.mood)
-            }}</span>
-          </div>
-          <div class="metric-divider" v-if="petStore.isSleeping"></div>
-          <div class="metric" v-if="petStore.isSleeping">
-            <span class="metric-label">STATE</span>
-            <span class="metric-value sleeping">💤</span>
-          </div>
+      <!-- Physical Buttons -->
+      <div class="control-panel">
+        <div class="physical-buttons">
+          <button
+            @click="petStore.feed()"
+            :disabled="!petStore.isAlive || petStore.isSleeping"
+            class="physical-btn btn-a"
+            aria-label="Feed pet"
+          >
+            <span class="btn-label">A</span>
+            <span class="btn-action">FEED</span>
+          </button>
+
+          <button
+            @click="petStore.play()"
+            :disabled="!petStore.isAlive || petStore.isSleeping"
+            class="physical-btn btn-b"
+            aria-label="Play with pet"
+          >
+            <span class="btn-label">B</span>
+            <span class="btn-action">PLAY</span>
+          </button>
+
+          <button
+            @click="handleCButton"
+            :disabled="!petStore.isAlive || (petStore.isSleeping && petStore.poopCount === 0)"
+            class="physical-btn btn-c"
+            aria-label="Clean or sleep"
+          >
+            <span class="btn-label">C</span>
+            <span class="btn-action" v-if="petStore.isSleeping">WAKE</span>
+            <span class="btn-action" v-else-if="petStore.poopCount > 0">CLEAN</span>
+            <span class="btn-action" v-else>SLEEP</span>
+          </button>
         </div>
+
+        <!-- Time Display -->
+        <div class="time-display">
+          <span class="time-icon">{{ getTimeOfDayIcon() }}</span>
+          <span class="time-text" @click="cycleTimeOfDay" :title="currentTimeOfDay">
+            {{ formatTimeDisplay() }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Revive Button (shown when pet is dead) -->
+      <div v-if="!petStore.isAlive" class="revive-overlay">
+        <button @click="petStore.revive()" class="revive-btn">
+          <span class="revive-icon">💖</span>
+          <span class="revive-text">REVIVE</span>
+        </button>
+      </div>
+
+      <!-- Notification Prompt -->
+      <div
+        v-if="!petStore.notificationEnabled && canRequestNotification() && petStore.isAlive"
+        class="notification-prompt"
+      >
+        <button @click="requestNotificationPermission" class="notification-btn">
+          <span class="btn-icon">🔔</span>
+          <span class="btn-text">Enable Alerts</span>
+        </button>
       </div>
     </div>
   </div>
@@ -322,7 +135,6 @@ import { usePetStore } from './stores/petStore'
 import PetScene from './components/PetScene.vue'
 
 const petStore = usePetStore()
-const lastAction = ref<string | null>(null)
 
 // Time of day tracking
 type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night'
@@ -368,6 +180,16 @@ function cycleTimeOfDay() {
   currentTimeOfDay.value = timesOfDay[nextIndex]
 }
 
+function handleCButton() {
+  if (petStore.isSleeping) {
+    petStore.sleep() // Wake up
+  } else if (petStore.poopCount > 0) {
+    petStore.clean()
+  } else {
+    petStore.sleep()
+  }
+}
+
 function canRequestNotification(): boolean {
   return 'Notification' in window && Notification.permission === 'default'
 }
@@ -376,80 +198,11 @@ async function requestNotificationPermission() {
   await petStore.requestNotificationPermission()
 }
 
-onMounted(() => {
-  timeUpdateInterval = window.setInterval(() => {
-    currentTimeOfDay.value = getTimeOfDay()
-  }, 60000)
-})
-
-onUnmounted(() => {
-  if (timeUpdateInterval !== null) {
-    clearInterval(timeUpdateInterval)
-  }
-})
-
 function getStatLevel(value: number): 'high' | 'medium' | 'low' | 'critical' {
   if (value > 60) return 'high'
   if (value > 30) return 'medium'
   if (value > 15) return 'low'
   return 'critical'
-}
-
-function getStatusIcon(): string {
-  if (!petStore.isAlive) return '💀'
-  if (petStore.lifeStage === 'egg') return '🥚'
-  if (petStore.isHatching) return '✨'
-  switch (petStore.mood) {
-    case 'happy':
-      return '😊'
-    case 'hungry':
-      return '😋'
-    case 'sick':
-      return '🤒'
-    case 'sleepy':
-      return '😴'
-    case 'sad':
-      return '😢'
-    case 'dirty':
-      return '🤢'
-    default:
-      return '😐'
-  }
-}
-
-function getStatusTitle(): string {
-  if (!petStore.isAlive) return 'SIGNAL LOST'
-  if (petStore.lifeStage === 'egg') return 'INCUBATING'
-  if (petStore.isHatching) return 'EVOLUTION IN PROGRESS'
-  switch (petStore.mood) {
-    case 'happy':
-      return 'OPTIMAL'
-    case 'hungry':
-      return 'REFUELING REQUIRED'
-    case 'sick':
-      return 'MEDICAL ALERT'
-    case 'sleepy':
-      return 'LOW ENERGY'
-    case 'sad':
-      return 'ATTENTION NEEDED'
-    case 'dirty':
-      return 'SANITY WARNING'
-    default:
-      return 'STABLE'
-  }
-}
-
-function getStatusMessage(): string {
-  if (!petStore.isAlive) return 'Pet has passed away. Press revive to start anew.'
-  if (petStore.lifeStage === 'egg') return 'Life is forming within... Hatch imminent.'
-  if (petStore.isHatching) return 'Transformation sequence initiating!'
-  if (petStore.mood === 'happy') return 'All systems nominal. Pet thriving.'
-  if (petStore.mood === 'hungry') return 'Nutrients depleted. Initiate feeding protocol.'
-  if (petStore.mood === 'sick') return 'Health critical. Medical care required.'
-  if (petStore.mood === 'sleepy') return 'Energy reserves low. Rest recommended.'
-  if (petStore.mood === 'sad') return 'Emotional stability compromised. Engagement needed.'
-  if (petStore.mood === 'dirty') return 'Environment contaminated. Cleanup required.'
-  return 'Vital signs stable. Continue monitoring.'
 }
 
 function getStageIcon(): string {
@@ -503,276 +256,163 @@ function getEvolutionLabel(): string {
   }
 }
 
-function formatAge(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`
-  const minutes = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  return `${minutes}m ${secs}s`
-}
+onMounted(() => {
+  timeUpdateInterval = window.setInterval(() => {
+    currentTimeOfDay.value = getTimeOfDay()
+  }, 60000)
+})
+
+onUnmounted(() => {
+  if (timeUpdateInterval !== null) {
+    clearInterval(timeUpdateInterval)
+  }
+})
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Press+Start+2P&family=Outfit:wght@400;600;700;800&display=swap');
 
 /* CSS Variables for Design System */
 :root {
-  --color-bg-primary: #f7f3e8;
-  --color-bg-secondary: #ede4d3;
-  --color-bg-card: #faf8f3;
-  --color-accent: #8b5cf6;
-  --color-accent-light: #a78bfa;
-  --color-accent-dark: #7c3aed;
-  --color-text-primary: #1a1a2e;
-  --color-text-secondary: #4a4a5e;
-  --color-text-tertiary: #8a8a9e;
-  --color-border: #e5e0d0;
-  --color-border-dark: #d4d0c0;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
+  /* Device colors - bold and playful */
+  --device-bg-primary: #fff176; /* Sunny yellow */
+  --device-bg-secondary: #ffd54f; /* Golden yellow */
+  --device-accent: #e91e63; /* Hot pink brand */
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  /* LCD display */
+  --lcd-bg: #c8f7c5; /* Classic green */
+  --lcd-frame: #4a4a4a; /* Dark gray */
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  /* Button colors - distinct and tactile */
+  --btn-a: #43a047; /* Green */
+  --btn-b: #1e88e5; /* Blue */
+  --btn-c: #fb8c00; /* Orange */
 
-  --font-display: 'Outfit', sans-serif;
-  --font-body: 'Space Grotesk', sans-serif;
+  /* Background */
+  --page-bg: #ff6b9d; /* Hot pink */
+}
+
+* {
+  box-sizing: border-box;
 }
 
 .app-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f7f3e8 0%, #ede4d3 50%, #f7f3e8 100%);
-  padding: 20px;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--page-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  overflow-x: hidden;
-}
-
-.app-container::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  opacity: 0.4;
-  z-index: 0;
+  padding: 8px;
 }
 
 .device-frame {
+  width: 90vw;
+  max-width: 400px;
+  height: 85vh;
+  max-height: 700px;
+  background: linear-gradient(145deg, var(--device-bg-primary), var(--device-bg-secondary));
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow:
+    inset 0 -10px 30px rgba(0, 0, 0, 0.1),
+    0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  padding: 65px 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Branding */
+.brand-logo {
+  text-align: center;
+  font-family: 'Permanent Marker', cursive;
+  font-size: 1.4rem;
+  color: var(--device-accent);
+  margin-bottom: 8px;
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+
+.brand-logo .accent {
+  color: #7b1fa2;
+}
+
+/* LCD Container */
+.lcd-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+  overflow: hidden;
+}
+
+.lcd-frame {
+  width: 75%;
+  background: var(--lcd-frame);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.lcd-screen {
+  background: var(--lcd-bg);
+  border-radius: 6px;
+  overflow: hidden;
   position: relative;
   width: 100%;
-  max-width: 1400px;
-  background: var(--color-bg-card);
-  border-radius: var(--radius-xl);
-  box-shadow:
-    var(--shadow-xl),
-    0 0 0 1px var(--color-border),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  overflow: hidden;
-  z-index: 1;
+  aspect-ratio: 1 / 1;
 }
 
-@media (min-width: 769px) {
-  .device-frame {
-    max-height: calc(100vh - 40px);
-    overflow-y: auto;
-  }
-}
-
-.device-content {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  padding: 0 20px;
-}
-
-@media (min-width: 769px) {
-  .device-content {
-    grid-template-columns: 1fr 320px;
-    gap: 16px;
-    padding: 0 20px 20px;
-  }
-}
-
-.main-column {
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-column {
-  display: flex;
-  flex-direction: column;
-}
-
-/* CRT Effects */
-.scanlines {
+/* Scanline effect */
+.lcd-screen::before {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: repeating-linear-gradient(
+  inset: 0;
+  background-image: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0.02) 0px,
-    rgba(0, 0, 0, 0.02) 1px,
-    transparent 1px,
-    transparent 2px
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
   );
   pointer-events: none;
-  z-index: 10;
-  opacity: 0.5;
-}
-
-.vignette {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.03) 100%);
-  pointer-events: none;
-  z-index: 9;
-}
-
-/* Device Header */
-.device-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  background: linear-gradient(180deg, rgba(139, 92, 246, 0.08) 0%, transparent 100%);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.header-indicators {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.indicator-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-text-tertiary);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.indicator-dot.active {
-  background: var(--color-success);
-  box-shadow:
-    0 0 8px var(--color-success),
-    0 0 16px var(--color-success);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
-.indicator-label {
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--color-text-tertiary);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.indicator-label .accent {
-  color: var(--color-accent);
-}
-
-.time-display {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-}
-
-.time-icon {
-  font-size: 0.9rem;
-}
-
-.time-text {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: color 0.2s ease;
-  user-select: none;
-}
-
-.time-text:hover {
-  color: var(--color-accent);
-}
-
-/* Viewport */
-.viewport {
-  position: relative;
-  padding: 16px 0;
-  background: var(--color-bg-secondary);
+  z-index: 2;
 }
 
 .scene-viewport {
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow:
-    var(--shadow-md),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  height: 280px;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
 }
 
-@media (min-width: 769px) {
-  .scene-viewport {
-    height: 280px;
-  }
-}
-
+/* Status Badges */
 .status-badges {
   position: absolute;
-  top: 24px;
-  left: 30px;
-  right: 30px;
+  top: 8px;
+  left: 8px;
+  right: 8px;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
   pointer-events: none;
+  z-index: 3;
 }
 
 .badge {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   animation: slideDown 0.4s ease-out;
 }
 
@@ -792,12 +432,9 @@ function formatAge(seconds: number): string {
 }
 
 .badge-text {
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  letter-spacing: 0.05em;
+  font-family: 'Outfit', sans-serif;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .stage-badge.egg {
@@ -822,7 +459,7 @@ function formatAge(seconds: number): string {
 
 .evolution-badge.perfect {
   background: linear-gradient(135deg, #fef08a, #fbbf24);
-  box-shadow: 0 2px 12px rgba(251, 191, 36, 0.5);
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.5);
 }
 
 .evolution-badge.good {
@@ -837,799 +474,295 @@ function formatAge(seconds: number): string {
   background: linear-gradient(135deg, #fee2e2, #fca5a5);
 }
 
-/* Stats Panel */
-.stats-panel {
-  padding: 12px 0 0 0;
-  border-top: 1px solid var(--color-border);
-}
-
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.panel-title {
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  letter-spacing: 0.1em;
-}
-
-.panel-subtitle {
-  font-family: var(--font-body);
-  font-size: 0.65rem;
-  font-weight: 500;
-  color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
-
-.stat-card {
-  padding: 10px;
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  border-color: var(--color-accent-light);
-  box-shadow: var(--shadow-sm);
-}
-
-.stat-card.stat-warning {
-  border-color: var(--color-warning);
-  background: linear-gradient(135deg, #fef3c7, #fef9e7);
-}
-
-.stat-card.stat-critical {
-  border-color: var(--color-error);
-  background: linear-gradient(135deg, #fee2e2, #fef2f2);
-  animation: criticalPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes criticalPulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-  }
-  50% {
-    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
-  }
-}
-
-.stat-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.stat-icon {
-  font-size: 1rem;
-}
-
-.stat-name {
-  font-family: var(--font-display);
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.stat-bar-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.stat-bar {
-  flex: 1;
-  height: 8px;
-  background: var(--color-bg-secondary);
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-}
-
-.stat-bar-fill {
+/* Stats Overlay */
+.stats-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: var(--stat-width, 100%);
-  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-light));
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-/* Hunger bar - orange */
-.stat-card:nth-child(1) .stat-bar-fill {
-  background: linear-gradient(90deg, #f97316, #fbbf24);
-}
-
-/* Happiness bar - pink */
-.stat-card:nth-child(2) .stat-bar-fill {
-  background: linear-gradient(90deg, #ec4899, #f472b6);
-}
-
-/* Energy bar - yellow */
-.stat-card:nth-child(3) .stat-bar-fill {
-  background: linear-gradient(90deg, #eab308, #facc15);
-}
-
-/* Health bar - red */
-.stat-card:nth-child(4) .stat-bar-fill {
-  background: linear-gradient(90deg, #ef4444, #f87171);
-}
-
-/* Warning state - intensify base colors */
-.stat-card.stat-warning:nth-child(1) .stat-bar-fill {
-  background: linear-gradient(90deg, #ea580c, #f97316);
-}
-
-.stat-card.stat-warning:nth-child(2) .stat-bar-fill {
-  background: linear-gradient(90deg, #db2777, #ec4899);
-}
-
-.stat-card.stat-warning:nth-child(3) .stat-bar-fill {
-  background: linear-gradient(90deg, #ca8a04, #eab308);
-}
-
-.stat-card.stat-warning:nth-child(4) .stat-bar-fill {
-  background: linear-gradient(90deg, #dc2626, #ef4444);
-}
-
-/* Critical state - even more intense */
-.stat-card.stat-critical:nth-child(1) .stat-bar-fill {
-  background: linear-gradient(90deg, #c2410c, #ea580c);
-}
-
-.stat-card.stat-critical:nth-child(2) .stat-bar-fill {
-  background: linear-gradient(90deg, #be185d, #db2777);
-}
-
-.stat-card.stat-critical:nth-child(3) .stat-bar-fill {
-  background: linear-gradient(90deg, #a16207, #ca8a04);
-}
-
-.stat-card.stat-critical:nth-child(4) .stat-bar-fill {
-  background: linear-gradient(90deg, #b91c1c, #dc2626);
-}
-
-.stat-bar-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  animation: shimmer 2s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.stat-value {
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-text-secondary);
-  min-width: 45px;
-  text-align: right;
-}
-
-.stat-value-mobile::after {
-  content: '%';
-}
-
-@media (max-width: 640px) {
-  .stat-value-mobile {
-    min-width: 32px;
-    font-size: 0.7rem;
-  }
-
-  .stat-value-mobile::after {
-    content: '';
-  }
-}
-
-/* Status Display */
-.status-display {
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  margin-top: 0;
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  border-left: 4px solid var(--color-accent);
-  transition: all 0.3s ease;
+  justify-content: space-around;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 4px 8px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  z-index: 3;
 }
 
-.status-display.happy {
-  border-left-color: var(--color-success);
-  background: linear-gradient(135deg, #d1fae5, #ecfdf5);
-}
-
-.status-display.hungry {
-  border-left-color: var(--color-warning);
-  background: linear-gradient(135deg, #fef3c7, #fffbeb);
-}
-
-.status-display.sick {
-  border-left-color: var(--color-error);
-  background: linear-gradient(135deg, #fee2e2, #fef2f2);
-}
-
-.status-display.sleepy {
-  border-left-color: var(--color-info);
-  background: linear-gradient(135deg, #e0e7ff, #eef2ff);
-}
-
-.status-display.sad {
-  border-left-color: var(--color-accent-dark);
-  background: linear-gradient(135deg, #f3e8ff, #faf5ff);
-}
-
-.status-display.dirty {
-  border-left-color: #b45309;
-  background: linear-gradient(135deg, #fef9c3, #fffef0);
-}
-
-.status-icon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
-.status-content {
-  flex: 1;
+.stat-badge {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
 }
 
-.status-title {
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: var(--color-text-tertiary);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+.stat-icon {
+  font-size: 0.9rem;
 }
 
-.status-message {
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  line-height: 1.4;
+.stat-value {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.65rem;
+  color: #fff;
 }
 
-/* Notification Prompt */
-.notification-prompt {
-  padding: 12px 0;
+.stat-badge.critical .stat-value {
+  color: #ff5252;
+  animation: pulse 0.5s infinite;
 }
 
-.notification-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-md);
-}
-
-.notification-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.notification-btn:active {
-  transform: translateY(0);
-}
-
-.btn-icon {
-  font-size: 1.1rem;
-}
-
-.btn-text {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: white;
-  flex: 1;
-  text-align: left;
-}
-
-.btn-arrow {
-  font-family: var(--font-body);
-  font-size: 1.1rem;
-  color: white;
-  transition: transform 0.3s ease;
-}
-
-.notification-btn:hover .btn-arrow {
-  transform: translateX(4px);
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Control Panel */
 .control-panel {
-  padding: 16px 0;
-  border-top: 1px solid var(--color-border);
+  padding-top: 8px;
+  flex-shrink: 0;
 }
 
-@media (min-width: 769px) {
-  .control-panel {
-    border-top: none;
-    padding: 16px 0 0 0;
-  }
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.control-btn {
-  position: relative;
-  padding: 0;
-  background: var(--color-bg-primary);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  overflow: hidden;
-}
-
-.control-btn:hover:not(:disabled) {
-  border-color: var(--color-accent-light);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.control-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.control-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-inner {
+.physical-buttons {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 14px 12px;
-}
-
-.control-btn .btn-icon {
-  font-size: 1.5rem;
-  transition: transform 0.3s ease;
-}
-
-.control-btn:hover:not(:disabled) .btn-icon {
-  transform: scale(1.1);
-}
-
-.control-btn .btn-label {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.control-btn .btn-hint {
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.control-btn.feed-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  border-color: #fbbf24;
-}
-
-.control-btn.play-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
-  border-color: var(--color-accent-light);
-}
-
-.control-btn.clean-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-  border-color: var(--color-info);
-}
-
-.control-btn.sleep-btn {
-  background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
-  border-color: var(--color-accent-light);
-}
-
-.control-btn.sleep-btn.btn-active {
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  border-color: #fbbf24;
-}
-
-.control-btn.revive-btn {
-  background: linear-gradient(135deg, #fce7f3, #fbcfe8);
-  border-color: var(--color-error);
-}
-
-.control-btn.revive-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #fbcfe8, #f9a8d4);
-}
-
-.control-btn.full-width {
-  grid-column: 1 / -1;
-}
-
-.control-btn.btn-pressed {
-  transform: scale(0.98);
-}
-
-.control-btn.btn-disabled {
-  opacity: 0.4;
-}
-
-/* Metrics Panel (Desktop) */
-.metrics-panel {
-  display: none;
-  padding: 16px 0 0;
-}
-
-@media (min-width: 769px) {
-  .metrics-panel {
-    display: block;
-  }
-}
-
-.metrics-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.metric-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-}
-
-.metric-item .metric-label {
-  font-family: var(--font-display);
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--color-text-tertiary);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.metric-value-large {
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.metric-value-large.mood-badge {
-  padding: 3px 10px;
-  border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
-  font-size: 0.7rem;
-}
-
-.metric-value-large.sleeping {
-  color: var(--color-info);
-}
-
-/* Device Footer */
-.device-footer {
-  padding: 14px 0;
-  background: var(--color-bg-secondary);
-  border-top: 1px solid var(--color-border);
-}
-
-@media (min-width: 769px) {
-  .device-footer.device-footer-mobile {
-    display: none;
-  }
-}
-
-.footer-metrics {
-  display: flex;
-  align-items: center;
   justify-content: space-around;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
-.metric {
+.physical-btn {
+  flex: 1;
+  max-width: 80px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 2px;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+  position: relative;
 }
 
-.metric-label {
-  font-family: var(--font-display);
-  font-size: 0.65rem;
+.physical-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+/* Button A - Green */
+.btn-a {
+  background: linear-gradient(145deg, #66bb6a, #43a047);
+  box-shadow:
+    0 6px 0 #2e7d32,
+    0 8px 12px rgba(0, 0, 0, 0.3),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.2),
+    inset 0 3px 8px rgba(255, 255, 255, 0.3);
+}
+
+.btn-a:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 2px 0 #2e7d32,
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 -1px 4px rgba(0, 0, 0, 0.2),
+    inset 0 1px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Button B - Blue */
+.btn-b {
+  background: linear-gradient(145deg, #42a5f5, #1e88e5);
+  box-shadow:
+    0 6px 0 #1565c0,
+    0 8px 12px rgba(0, 0, 0, 0.3),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.2),
+    inset 0 3px 8px rgba(255, 255, 255, 0.3);
+}
+
+.btn-b:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 2px 0 #1565c0,
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 -1px 4px rgba(0, 0, 0, 0.2),
+    inset 0 1px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Button C - Orange */
+.btn-c {
+  background: linear-gradient(145deg, #ffa726, #fb8c00);
+  box-shadow:
+    0 6px 0 #ef6c00,
+    0 8px 12px rgba(0, 0, 0, 0.3),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.2),
+    inset 0 3px 8px rgba(255, 255, 255, 0.3);
+}
+
+.btn-c:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 2px 0 #ef6c00,
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 -1px 4px rgba(0, 0, 0, 0.2),
+    inset 0 1px 4px rgba(255, 255, 255, 0.3);
+}
+
+.btn-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.1rem;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.btn-action {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: var(--color-text-tertiary);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.metric-value {
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
+/* Time Display */
+.time-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 12px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.metric-value.mood-badge {
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-primary);
-  font-size: 0.75rem;
-}
-
-.metric-value.sleeping {
+.time-icon {
   font-size: 1.2rem;
 }
 
-.metric-divider {
-  width: 1px;
-  height: 24px;
-  background: var(--color-border);
+.time-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.65rem;
+  color: #5d4037;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Revive Overlay */
+.revive-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  z-index: 10;
+}
+
+.revive-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  background: linear-gradient(145deg, #e91e63, #c2185b);
+  border: none;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  cursor: pointer;
+  box-shadow:
+    0 6px 0 #880e4f,
+    0 8px 16px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+
+.revive-btn:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 2px 0 #880e4f,
+    0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.revive-icon {
+  font-size: 2rem;
+}
+
+.revive-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Notification Prompt */
+.notification-prompt {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+}
+
+.notification-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(145deg, #e91e63, #c2185b);
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow:
+    0 4px 0 #880e4f,
+    0 6px 12px rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+
+.notification-btn:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 2px 0 #880e4f,
+    0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.notification-btn .btn-icon {
+  font-size: 1rem;
+}
+
+.notification-btn .btn-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
 }
 
 /* Responsive */
-@media (max-width: 640px) {
-  .app-container {
-    padding: 8px;
-    align-items: flex-start;
-  }
-
+@media (max-height: 700px) {
   .device-frame {
-    max-width: 100%;
+    height: 95vh;
   }
 
-  .device-content {
-    padding: 0 12px;
-  }
-
-  .device-header {
-    padding: 8px 12px;
-  }
-
-  .time-display {
-    padding: 4px 8px;
-  }
-
-  .time-icon {
-    font-size: 0.8rem;
-  }
-
-  .time-text {
-    font-size: 0.7rem;
-  }
-
-  .viewport {
-    padding: 8px 0;
-  }
-
-  .scene-viewport {
-    height: 260px;
-  }
-
-  .status-badges {
-    top: 12px;
-    left: 16px;
-    right: 16px;
-  }
-
-  .badge {
-    padding: 4px 8px;
-    gap: 4px;
-  }
-
-  .badge-icon {
-    font-size: 0.8rem;
-  }
-
-  .badge-text {
-    font-size: 0.6rem;
-  }
-
-  .stats-panel {
-    padding: 8px 0 6px 0;
-  }
-
-  .panel-header {
-    margin-bottom: 6px;
-  }
-
-  .panel-title {
-    font-size: 0.7rem;
-  }
-
-  .panel-subtitle {
-    font-size: 0.6rem;
-  }
-
-  .stats-grid {
-    gap: 6px;
-  }
-
-  .stat-card {
-    padding: 6px 8px;
-  }
-
-  .stat-header {
-    margin-bottom: 4px;
-    gap: 4px;
-  }
-
-  .stat-icon {
-    font-size: 0.85rem;
-  }
-
-  .stat-name {
-    font-size: 0.65rem;
-  }
-
-  .stat-bar-container {
-    gap: 6px;
-  }
-
-  .stat-bar {
-    height: 6px;
-  }
-
-  .stat-value {
-    font-size: 0.7rem;
-    min-width: 32px;
-  }
-
-  .status-display {
-    margin-top: 0;
-    padding: 8px 10px;
-  }
-
-  .status-icon {
-    font-size: 1.1rem;
-  }
-
-  .status-title {
-    font-size: 0.6rem;
-  }
-
-  .status-message {
-    font-size: 0.7rem;
-  }
-
-  .notification-prompt {
-    padding: 6px 0;
-  }
-
-  .notification-btn {
-    padding: 8px 12px;
-  }
-
-  .notification-btn .btn-icon {
-    font-size: 1rem;
-  }
-
-  .notification-btn .btn-text {
-    font-size: 0.75rem;
-  }
-
-  .notification-btn .btn-arrow {
-    font-size: 0.9rem;
+  .brand-logo {
+    margin-bottom: 8px;
   }
 
   .control-panel {
-    padding: 8px 0;
-  }
-
-  .actions-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-  }
-
-  .btn-inner {
-    padding: 12px 6px;
-    gap: 2px;
-  }
-
-  .control-btn .btn-icon {
-    font-size: 1.5rem;
-  }
-
-  .control-btn .btn-label {
-    display: none;
-  }
-
-  .control-btn .btn-hint {
-    display: none;
-  }
-
-  .control-btn.full-width {
-    grid-column: 1 / -1;
-  }
-
-  .control-btn.full-width .btn-label {
-    display: block;
-    font-size: 0.75rem;
-  }
-
-  .control-btn.full-width .btn-hint {
-    display: block;
-    font-size: 0.6rem;
-  }
-
-  .control-btn.full-width .btn-inner {
-    padding: 10px 12px;
-  }
-
-  .device-footer {
-    padding: 8px 0;
-  }
-
-  .footer-metrics {
-    gap: 8px;
-  }
-
-  .metric-label {
-    font-size: 0.55rem;
-  }
-
-  .metric-value {
-    font-size: 0.75rem;
-  }
-
-  .metric-value.mood-badge {
-    font-size: 0.65rem;
-    padding: 2px 6px;
-  }
-
-  .metric-value.sleeping {
-    font-size: 1rem;
-  }
-
-  .metric-divider {
-    height: 18px;
+    padding-top: 12px;
   }
 }
 </style>
