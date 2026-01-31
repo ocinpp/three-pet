@@ -268,8 +268,7 @@ function resetGame() {
       'Are you sure you want to restart? This will clear all progress and start with a fresh egg!'
     )
   ) {
-    localStorage.removeItem('three-pet-state')
-    location.reload()
+    petStore.reset()
   }
 }
 

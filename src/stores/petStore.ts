@@ -294,6 +294,26 @@ export const usePetStore = defineStore('pet', () => {
     careSamples.value = 0
   }
 
+  function reset() {
+    // Full game reset - same as revive but also clears localStorage
+    localStorage.removeItem('three-pet-state')
+    hunger.value = 100
+    happiness.value = 100
+    health.value = 100
+    energy.value = 100
+    age.value = 0
+    lifeStage.value = 'egg'
+    evolutionType.value = 'normal'
+    isAlive.value = true
+    isHatching.value = false
+    isSleeping.value = false
+    currentAction.value = 'idle'
+    poopCount.value = 0
+    totalCareScore.value = 0
+    careSamples.value = 0
+    lastActiveTime.value = Date.now()
+  }
+
   // Calculate evolution type based on care quality
   function calculateEvolution(): EvolutionType {
     if (careSamples.value === 0) return 'normal'
@@ -489,6 +509,7 @@ export const usePetStore = defineStore('pet', () => {
     sleep,
     clean,
     revive,
+    reset,
     requestNotificationPermission,
   }
 })
