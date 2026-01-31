@@ -105,6 +105,12 @@
             {{ formatTimeDisplay() }}
           </span>
         </div>
+
+        <!-- Restart Button (retro pin reset style) -->
+        <button @click="resetGame" class="restart-btn" aria-label="Reset Game">
+          <span class="restart-icon">🔄</span>
+          <span class="restart-text">RESET</span>
+        </button>
       </div>
 
       <!-- Revive Button (shown when pet is dead) -->
@@ -253,6 +259,17 @@ function getEvolutionLabel(): string {
       return 'Neglected'
     default:
       return ''
+  }
+}
+
+function resetGame() {
+  if (
+    confirm(
+      'Are you sure you want to restart? This will clear all progress and start with a fresh egg!'
+    )
+  ) {
+    localStorage.removeItem('three-pet-state')
+    location.reload()
   }
 }
 
@@ -629,6 +646,36 @@ onUnmounted(() => {
   font-weight: 700;
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Restart Button (below controls - retro pin reset style) */
+.restart-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.restart-btn:active {
+  transform: translateY(0);
+}
+
+.restart-icon {
+  font-size: 1rem;
+}
+
+.restart-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: #c8f7c5;
 }
 
 /* Time Display */

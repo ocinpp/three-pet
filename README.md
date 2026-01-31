@@ -22,8 +22,9 @@ A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience rai
 - **Tamagotchi-Style Device Interface** - Authentic 90s egg-shaped device frame with:
   - Sunny yellow gradient body with hot pink page background
   - Physical A/B/C control buttons with 3D tactile press effects
-  - Retro LCD screen with scanline overlay (75% width)
+  - Retro LCD screen with scanline overlay (75% width, square 1:1)
   - Compact mobile-first design (no scrolling)
+  - Reset button below controls (retro pin reset style)
   - "Enable Alerts" button positioned outside device frame
 - **Unique 3D Voxel Models** - Different designs for each life stage
 - **Evolution Effects** - Colorful particle effects when pet evolves
@@ -40,6 +41,7 @@ A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience rai
 - **Offline Time Calculation** - Pet continues to age even when tab is closed!
   - Saves state to localStorage
   - Simulates missed ticks when you return
+  - Capped at 1 hour maximum to prevent excessive aging
   - Tracks time when browser is throttled
 - **Browser Notifications** - Get alerted when your pet needs attention:
   - 🍖 Hungry alerts
@@ -81,6 +83,7 @@ Your pet shows different moods with unique colors:
   - Clean when poop is present (removes poop, +10 happiness)
   - Put pet to sleep (restores energy +2/sec)
   - Wake pet up when sleeping
+- **RESET Button** - Clears all saved progress and restarts with a fresh egg (retro pin reset style)
 
 ### Basic Care
 1. **Wait to Hatch** - Egg takes 30 seconds to hatch
@@ -172,6 +175,7 @@ src/
 │                              # - Egg-shaped device frame
 │                              # - LCD screen container with overlay stats
 │                              # - Physical A/B/C control buttons
+│                              # - RESET button (retro pin reset style)
 │                              # - Time-of-day badge
 │                              # - Notification prompt
 └── main.ts                   # App entry point, Pinia setup
@@ -202,6 +206,7 @@ The game features an authentic Tamagotchi-inspired design:
 - **Button A** (Green `#43A047`): Feed action
 - **Button B** (Blue `#1E88E5`): Play action
 - **Button C** (Orange `#FB8C00`): Smart button (Clean/Sleep/Wake)
+- **RESET Button**: Retro pin reset style, full-width button below controls
 - **Style**: 3D tactile appearance with press animations
 
 #### Typography
