@@ -208,10 +208,16 @@ export const usePetStore = defineStore('pet', () => {
 
     // If more than 1 second has passed, simulate the missed ticks
     if (elapsedSeconds > 1) {
-      console.log(`Processing ${elapsedSeconds} seconds of offline time...`)
+      // Cap offline time at 1 hour (3600 seconds) to prevent excessive aging
+      const maxOfflineSeconds = 3600
+      const secondsToSimulate = Math.min(elapsedSeconds, maxOfflineSeconds)
+
+      console.log(
+        `Processing ${secondsToSimulate} seconds of offline time (was ${elapsedSeconds}s total)...`
+      )
 
       // Simulate each second that passed
-      for (let i = 0; i < elapsedSeconds; i++) {
+      for (let i = 0; i < secondsToSimulate; i++) {
         tick()
       }
     }

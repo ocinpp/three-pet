@@ -114,17 +114,17 @@
           <span class="revive-text">REVIVE</span>
         </button>
       </div>
+    </div>
 
-      <!-- Notification Prompt -->
-      <div
-        v-if="!petStore.notificationEnabled && canRequestNotification() && petStore.isAlive"
-        class="notification-prompt"
-      >
-        <button @click="requestNotificationPermission" class="notification-btn">
-          <span class="btn-icon">🔔</span>
-          <span class="btn-text">Enable Alerts</span>
-        </button>
-      </div>
+    <!-- Notification Prompt (outside device frame) -->
+    <div
+      v-if="!petStore.notificationEnabled && canRequestNotification() && petStore.isAlive"
+      class="notification-prompt"
+    >
+      <button @click="requestNotificationPermission" class="notification-btn">
+        <span class="btn-icon">🔔</span>
+        <span class="btn-text">Enable Alerts</span>
+      </button>
     </div>
   </div>
 </template>
@@ -707,13 +707,12 @@ onUnmounted(() => {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Notification Prompt */
+/* Notification Prompt (outside device frame) */
 .notification-prompt {
   position: absolute;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
 }
 
 .notification-btn {

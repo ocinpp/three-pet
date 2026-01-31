@@ -1,6 +1,6 @@
 # Three Pet - Browser Tamagotchi 🎮
 
-A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience raising your own virtual pet with real-time needs, evolution system, day/night cycles, and browser notifications!
+A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience raising your own virtual pet with real-time needs, evolution system, day/night cycles, and browser notifications - all in a nostalgic Tamagotchi-inspired device interface!
 
 ![Three Pet](https://img.shields.io/badge/Vue-3.5.13-42b883) ![Pinia](https://img.shields.io/badge/Pinia-2.2.8-yellow) ![Three.js](https://img.shields.io/badge/Three.js-0.173.0-white)
 
@@ -19,6 +19,12 @@ A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience rai
 - **Revive System** - Start over when pet passes away
 
 ### 🎨 Visual Features
+- **Tamagotchi-Style Device Interface** - Authentic 90s egg-shaped device frame with:
+  - Sunny yellow gradient body with hot pink page background
+  - Physical A/B/C control buttons with 3D tactile press effects
+  - Retro LCD screen with scanline overlay (75% width)
+  - Compact mobile-first design (no scrolling)
+  - "Enable Alerts" button positioned outside device frame
 - **Unique 3D Voxel Models** - Different designs for each life stage
 - **Evolution Effects** - Colorful particle effects when pet evolves
 - **Time-of-Day System** - Dynamic backgrounds and lighting:
@@ -68,13 +74,21 @@ Your pet shows different moods with unique colors:
 
 ## 🎯 How to Play
 
+### Controls
+- **Button A** (Green) - Feed your pet to restore hunger (+30)
+- **Button B** (Blue) - Play with your pet to increase happiness (+25, costs -10 hunger)
+- **Button C** (Orange) - Smart button:
+  - Clean when poop is present (removes poop, +10 happiness)
+  - Put pet to sleep (restores energy +2/sec)
+  - Wake pet up when sleeping
+
 ### Basic Care
 1. **Wait to Hatch** - Egg takes 30 seconds to hatch
 2. **Keep Stats High**:
-   - Click **🍖 Feed** to restore hunger (+30)
-   - Click **🎮 Play** to increase happiness (+25, costs -10 hunger)
-   - Click **😴 Sleep** to restore energy (+2/sec while sleeping)
-   - Click **🧹 Clean** to remove poop and boost happiness (+10)
+   - Press **A** to feed and restore hunger (+30)
+   - Press **B** to play and increase happiness (+25, costs -10 hunger)
+   - Press **C** to clean poop (+10 happiness) or put pet to sleep/wake up
+   - While sleeping, pet restores energy (+2/sec)
 3. **Watch Stats Decay**:
    - Hunger -0.5/sec | Happiness -0.3/sec | Energy -0.2/sec
    - Health decreases if any stat drops below 30%
@@ -154,14 +168,46 @@ src/
 │                              # - Decay rates
 │                              # - Thresholds
 │                              # - Action values
-├── App.vue                   # Main UI with stats, badges, and controls
-│                              # - Status color system
+├── App.vue                   # Tamagotchi-style device interface
+│                              # - Egg-shaped device frame
+│                              # - LCD screen container with overlay stats
+│                              # - Physical A/B/C control buttons
 │                              # - Time-of-day badge
-│                              # - Action buttons
+│                              # - Notification prompt
 └── main.ts                   # App entry point, Pinia setup
 ```
 
 ## 🎨 Design System
+
+### Tamagotchi Device Interface
+
+The game features an authentic Tamagotchi-inspired design:
+
+#### Device Frame
+- **Shape**: Egg-shaped with asymmetric border-radius (`50% 50% 50% 50% / 60% 60% 40% 40%`)
+- **Colors**: Sunny yellow gradient (`#FFF176` → `#FFD54F`)
+- **Dimensions**: 90vw × 85vh (max 400px × 700px)
+- **Padding**: 65px vertical, 18px horizontal
+- **Background**: Hot pink page background (`#FF6B9D`)
+- **Overflow**: Hidden (keeps all elements inside)
+
+#### LCD Screen
+- **Aspect Ratio**: Square (1:1)
+- **Width**: 75% of device frame width
+- **Background**: Classic LCD green (`#C8F7C5`)
+- **Frame**: Dark gray (`#4A4A4A`)
+- **Effects**: Scanline overlay for retro feel
+
+#### Physical Buttons
+- **Button A** (Green `#43A047`): Feed action
+- **Button B** (Blue `#1E88E5`): Play action
+- **Button C** (Orange `#FB8C00`): Smart button (Clean/Sleep/Wake)
+- **Style**: 3D tactile appearance with press animations
+
+#### Typography
+- **Branding**: Permanent Marker (retro marker font)
+- **Labels**: Press Start 2P (pixel font)
+- **UI Text**: Outfit (modern sans-serif)
 
 ### Color Palette
 
@@ -369,7 +415,7 @@ For custom models, create them in [MagicaVoxel](https://ephtracy.github.io/) and
 - ✅ Chrome/Edge (full support)
 - ✅ Firefox (full support)
 - ✅ Safari (notifications may require user interaction)
-- ⚠️ Mobile (responsive, but optimized for desktop)
+- ✅ Mobile (optimized for mobile with responsive design)
 
 ## 🙏 Credits
 
@@ -378,6 +424,12 @@ Built with modern web technologies:
 - Three.js for 3D graphics
 - Pinia for state management
 - Vite for lightning-fast development
+
+Inspired by the classic Tamagotchi handheld digital pets, featuring:
+- Authentic egg-shaped device design
+- Retro LCD screen aesthetic
+- Physical button interaction model
+- Mobile-first responsive layout
 
 ---
 
