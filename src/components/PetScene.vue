@@ -121,82 +121,46 @@ function getLightIntensity(): { ambient: number; directional: number } {
 // Create egg
 function createEgg(): THREE.Group {
   const group = new THREE.Group()
-  const v = 0.5
+  const v = 0.2 // Smaller voxels for smoother curves
 
-  // Creamy pastel egg
-  const eggMaterial = new THREE.MeshLambertMaterial({ color: 0xfff5ee })
-  const spotMaterial = new THREE.MeshLambertMaterial({ color: 0xffb6c1 })
-  const highlightMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff })
+  // Pure white egg using BasicMaterial (no lighting effects)
+  const eggMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
 
-  // Create adorable egg shape from voxels
-  for (let y = -2; y <= 4; y++) {
-    const radius = y < 0 ? 2.2 : y > 2 ? 1.0 : 1.8
-    for (let x = -2; x <= 2; x++) {
-      for (let z = -2; z <= 2; z++) {
+  // Smooth egg silhouette - wider bottom, cut top 2 layers
+  const eggRadii = [
+    2.0,  // 0 - bottom (much wider!)
+    2.8,  // 1
+    3.3,  // 2
+    3.6,  // 3
+    3.8,  // 4 - max width
+    3.8,  // 5 - max width sustained
+    3.6,  // 6
+    3.3,  // 7
+    2.9,  // 8
+    2.5,  // 9
+    2.1,  // 10
+    1.7,  // 11 - cut here (removed top 2 layers)
+  ]
+
+  const height = eggRadii.length
+
+  for (let y = 0; y < height; y++) {
+    const radius = eggRadii[y]
+    const maxDist = Math.ceil(radius * 2)
+
+    for (let x = -maxDist; x <= maxDist; x++) {
+      for (let z = -maxDist; z <= maxDist; z++) {
         const dist = Math.sqrt(x * x + z * z)
         if (dist <= radius) {
           const voxel = new THREE.Mesh(new THREE.BoxGeometry(v, v, v), eggMaterial)
-          voxel.position.set(x * v, y * v, z * v)
+          voxel.position.set(x * v, (y - height / 2) * v, z * v)
           group.add(voxel)
         }
       }
     }
   }
 
-  // Cute heart spots
-  const spotMaterial2 = new THREE.MeshLambertMaterial({ color: 0xff69b4 })
-  const spots = [
-    [1, 2, 2],
-    [-1, 1, 2],
-    [0, 0, 2],
-    [1, 1, 2],
-    [-1, 2, 2],
-    [0, 1, 2],
-  ]
-  spots.forEach(([x, y, z]) => {
-    const spot = new THREE.Mesh(
-      new THREE.BoxGeometry(v * 0.35, v * 0.35, v * 0.35),
-      Math.random() > 0.5 ? spotMaterial : spotMaterial2
-    )
-    spot.position.set(x * v, y * v, z * v)
-    group.add(spot)
-  })
-
-  // Shine highlight
-  const highlight = new THREE.Mesh(
-    new THREE.BoxGeometry(v * 0.5, v * 0.3, v * 0.2),
-    highlightMaterial
-  )
-  highlight.position.set(v * 0.8, v * 2.5, v * 2.1)
-  group.add(highlight)
-
-  // Tiny blush marks on egg (so cute!)
-  const blushMaterial = new THREE.MeshLambertMaterial({ color: 0xffb6c1 })
-  const leftBlush = new THREE.Mesh(
-    new THREE.BoxGeometry(v * 0.4, v * 0.15, v * 0.15),
-    blushMaterial
-  )
-  leftBlush.position.set(-v * 1.5, v * 1, v * 2.1)
-  group.add(leftBlush)
-
-  const rightBlush = new THREE.Mesh(
-    new THREE.BoxGeometry(v * 0.4, v * 0.15, v * 0.15),
-    blushMaterial
-  )
-  rightBlush.position.set(v * 1.5, v * 1, v * 2.1)
-  group.add(rightBlush)
-
-  // Cute crack hint
-  const crackMaterial = new THREE.MeshLambertMaterial({ color: 0xddd5d0 })
-  const crack1 = new THREE.Mesh(new THREE.BoxGeometry(v * 0.1, v * 0.6, v * 0.1), crackMaterial)
-  crack1.position.set(0, v * 3.5, v * 2.1)
-  group.add(crack1)
-
-  const crack2 = new THREE.Mesh(new THREE.BoxGeometry(v * 0.4, v * 0.1, v * 0.1), crackMaterial)
-  crack2.position.set(-v * 0.2, v * 3.8, v * 2.1)
-  group.add(crack2)
-
-  group.scale.set(0.4, 0.4, 0.4)
+  group.scale.set(0.25, 0.25, 0.25) // Smaller scale to fit in view
   return group
 }
 
@@ -866,17 +830,13 @@ function createPoop(): THREE.Mesh {
   const poopMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 })
   const poopGroup = new THREE.Group()
 
-  // Create a cute poop shape
-  for (let y = 0; y <= 3; y++) {
-    const radius = y < 2 ? 1 : y === 2 ? 0.7 : 0.4
+  // Create a cube poop (cut top)
+  for (let y = 0; y <= 2; y++) {
     for (let x = -1; x <= 1; x++) {
       for (let z = -1; z <= 1; z++) {
-        const dist = Math.sqrt(x * x + z * z)
-        if (dist <= radius) {
-          const voxel = new THREE.Mesh(new THREE.BoxGeometry(v, v, v), poopMaterial)
-          voxel.position.set(x * v, y * v, z * v)
-          poopGroup.add(voxel)
-        }
+        const voxel = new THREE.Mesh(new THREE.BoxGeometry(v, v, v), poopMaterial)
+        voxel.position.set(x * v, y * v, z * v)
+        poopGroup.add(voxel)
       }
     }
   }

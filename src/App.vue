@@ -547,8 +547,8 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
+  gap: 20px;
+  margin-bottom: 25px;
 }
 
 .physical-btn {
