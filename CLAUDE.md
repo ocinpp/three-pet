@@ -90,21 +90,29 @@ git commit -m "Your message"
 ```
 src/
 ├── components/
-│   └── PetScene.vue          # Three.js 3D scene component
-│                              # Contains all voxel models (egg, baby, child, adult, elder)
-│                              # Handles animations, particles, lighting, and time-of-day transitions
+│   ├── PetScene.vue          # Three.js 3D scene component
+│   │                         # Contains all voxel models (egg, baby, child, adult, elder)
+│   │                         # Handles animations, particles, lighting, and time-of-day transitions
+│   └── AppNotifications.vue  # In-app notification component
+│                             # Slide-in notification cards with icons and colors
+│                             # Auto-dismiss after 5 minutes, click-to-dismiss
 ├── stores/
-│   └── petStore.ts           # Pinia store with all game logic
-│                              # Game loop (1 second ticks)
-│                              # State management, evolution logic
-│                              # Offline time calculation
-│                              # Notification system with cooldowns
+│   ├── petStore.ts           # Pinia store with all game logic
+│   │                         # Game loop (1 second ticks)
+│   │                         # State management, evolution logic
+│   │                         # Offline time calculation
+│   │                         # Hybrid notification system (browser + in-app)
+│   └── notificationStore.ts  # In-app notification state management
+│                             # Notifications list, unread count tracking
+│                             # Add, dismiss, mark as read methods
 ├── constants/
 │   └── pet.ts                # Game balance constants
-│                              # Evolution timings, decay rates, thresholds
+│                             # Evolution timings, decay rates, thresholds
 ├── App.vue                   # Main UI component
-│                              # Stats display, action buttons
-│                              # Time-of-day tracking
+│                             # Stats display, action buttons
+│                             # Time-of-day tracking
+│                             # Notification indicator badge (🔔)
+│                             # Smart "Enable Alerts" button (hidden on iOS)
 └── main.ts                   # App entry point
 ```
 
@@ -140,10 +148,21 @@ src/
 - Important: Pet continues to age even when tab is closed
 
 #### Notification System
+- **Hybrid approach**: Browser notifications (when supported) + in-app fallback
+- **Primary**: Browser Notification API for desktop and Android Chrome
+- **Fallback**: In-app notifications (iOS Safari, permission denied, unsupported browsers)
+- **In-App Component** (`AppNotifications.vue`):
+  - Slide-in notification cards with type-specific colors and icons
+  - Auto-dismiss after 5 minutes (300,000ms)
+  - Click-to-dismiss functionality
+  - Visual indicator (🔔) with pulsing animation showing unread count
+- **Smart button detection**: "Enable Alerts" button hidden on iOS Safari
 - Only sends notifications when `document.hidden` is true (tab inactive)
 - Cooldown system prevents spam (1 minute default per notification type)
 - Tracks `lastNotificationTime` per type: hungry, sick, sleepy, sad, dirty, dead, evolved
-- Requests permission on first user interaction
+- **notificationStore.ts**: Dedicated Pinia store for in-app notifications
+  - State: `notifications` (array), `unreadCount` (number)
+  - Methods: `addNotification()`, `dismissNotification()`, `markAsRead()`, `markAllAsRead()`, `clearAll()`
 
 #### Evolution System
 - 5 life stages: egg → baby → child → adult → elder
@@ -197,7 +216,12 @@ src/
 #### App.vue
 - Main UI container with stat bars and action buttons
 - Manages time-of-day state (updates every 60 seconds)
-- Handles notification permission requests
+- **Hybrid notification integration**:
+  - Imports `useNotificationStore` for in-app notifications
+  - Displays notification indicator badge (🔔) with unread count
+  - Includes `<AppNotifications />` component for in-app alerts
+  - Smart "Enable Alerts" button (hidden on iOS Safari via `canRequestNotification()`)
+  - Helpful toast messages when notifications are unavailable/denied
 - All action buttons disabled when pet is sleeping (except sleep/wake button)
 
 #### PetScene.vue
@@ -207,6 +231,20 @@ src/
   - `poopCount` change → add/remove poop meshes
   - `isSleeping` change → toggle sleep light + update colors
 - Animation loop runs via `requestAnimationFrame`
+
+#### AppNotifications.vue
+- In-app notification component with slide-in cards
+- **Type-specific styling**:
+  - Hungry: Yellow border, light yellow background (😋)
+  - Sick: Red border, light red background (🤒)
+  - Sleepy: Indigo border, light indigo background (😴)
+  - Sad: Purple border, light purple background (😢)
+  - Dirty: Lime border, light lime background (🤢)
+  - Dead: Dark gray border, light gray background (💀)
+  - Evolved: Yellow border, light yellow background (✨)
+- **Animation**: Slide-in from right, slide-out to right (0.3s ease)
+- **Auto-dismiss**: Removes notifications after 5 minutes
+- **Click behavior**: Click anywhere on card to dismiss
 
 ### Game Balance (src/constants/pet.ts)
 
@@ -228,13 +266,35 @@ Key constants for gameplay tuning:
   - `freeze` - Browser freezing page to save memory
   - `resume` - Browser thawing frozen page
 - **Focus/Blur Events**: Detect tab switching for additional state saves
-- **Notification API**: Native browser notifications
+- **Notification API**: Native browser notifications (with in-app fallback)
 - **localStorage**: Persistent state saving
 - **requestAnimationFrame**: Smooth 60fps animations
+- **User Agent Detection**: Smart detection of iOS Safari to hide "Enable Alerts" button
+
+#### Hybrid Notification Architecture
+- **Detection Flow** (`App.vue:canRequestNotification()`):
+  1. Check if iOS Safari (UA detection + Safari browser check)
+  2. Return `false` to hide button on iOS Safari
+  3. Return `true` on other platforms if Notification API available and permission is `default`
+- **Send Notification Flow** (`petStore.ts:sendNotification()`):
+  1. Check cooldown (default 1 minute per type)
+  2. Try browser notification if `Notification.permission === 'granted'`
+  3. Fall back to in-app notification if:
+     - Notification API not supported (`!('Notification' in window)`)
+     - Permission denied (`Notification.permission === 'denied'`)
+- **In-App Notifications** (`notificationStore.ts`):
+  - Unshift new notifications to beginning of array (newest first)
+  - Increment `unreadCount` for each new notification
+  - Auto-dismiss after 5 minutes via `setTimeout`
+  - Decrement `unreadCount` when notification is marked read or dismissed
 
 #### Mobile Browser Considerations
 - **iOS Safari**: Event firing is unreliable, uses delayed double-save workaround
-- **Android Chrome**: Works well with standard Page Visibility API
+- **iOS Safari + Notifications**: Browser Notification API NOT supported in regular browser mode
+  - In-app notifications used automatically
+  - "Enable Alerts" button hidden to avoid confusion
+  - Only works when site is added to home screen as PWA
+- **Android Chrome**: Works well with standard Page Visibility API, supports browser notifications
 - **Timer Throttling**: Background tabs throttle `setInterval` - relies on timestamp calculation instead
 - **Process Killing**: Mobile browsers may kill background tabs - periodic auto-save provides backup
 - **localStorage Clearing**: Some browsers clear localStorage on force-quit - state validation handles this
@@ -299,3 +359,49 @@ The game logs various events for debugging mobile issues:
 - **iOS Safari** - Can still lose state if browser is force-quit and localStorage is cleared (OS-level limitation)
 - **Timer Throttling** - Background tabs may throttle setInterval, but timestamp calculation compensates
 - **Max Offline Cap** - Only processes up to 1 hour of offline time to prevent excessive aging
+- **iOS Browser Notifications** - Notification API only works when site is added to home screen as PWA, not in regular browser mode
+
+## Hybrid Notification Testing
+
+### Testing Checklist
+
+#### Desktop Testing (Browser Notifications)
+1. Click "Enable Alerts" → should request browser notification permission
+2. Grant permission → browser notifications should work
+3. Switch to another tab, let pet get hungry/sick → should see browser notification
+4. Deny permission → should fall back to in-app notifications
+5. Let pet get hungry/sick with tab visible → should see in-app notification popup
+6. Check notification indicator (🔔) shows count
+7. Click notification to dismiss
+8. Click notification indicator to mark all as read
+
+#### iOS Safari Testing (In-App Only)
+1. **"Enable Alerts" button should NOT appear** (smart detection)
+2. Let pet get hungry/sick → should see in-app notification popup
+3. Check notification indicator works (🔔 with count)
+4. Click notification to dismiss
+5. Switch apps/lock phone, return → in-app notifications should appear if pet needs attention
+
+#### Android Chrome Testing (Browser + In-App Fallback)
+1. Click "Enable Alerts" → should request permission
+2. Grant permission → should use browser notifications
+3. Background app, trigger notification → should see system notification
+4. Deny permission → should fall back to in-app notifications
+
+### Notification Types & Cooldowns
+- **hungry** (😋) - 1 minute cooldown
+- **sick** (🤒) - 1 minute cooldown
+- **sleepy** (😴) - 1 minute cooldown
+- **sad** (😢) - 1 minute cooldown
+- **dirty** (🤢) - 1 minute cooldown
+- **dead** (💀) - 1 minute cooldown
+- **evolved** (✨) - 5 minute cooldown
+
+### Success Criteria
+- ✅ iOS Safari users get in-app notifications (no confusion)
+- ✅ Desktop users get browser notifications (when permitted)
+- ✅ Android users get browser notifications (when permitted)
+- ✅ Graceful fallback when permission denied
+- ✅ Visual indicator for unread in-app notifications
+- ✅ "Enable Alerts" button hidden on iOS Safari
+- ✅ All notification types have unique colors and icons

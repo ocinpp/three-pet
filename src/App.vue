@@ -122,6 +122,16 @@
       </button>
     </div>
 
+    <!-- Notification Indicator -->
+    <div
+      v-if="notificationStore.unreadCount > 0"
+      class="notification-indicator"
+      @click="notificationStore.markAllAsRead()"
+    >
+      <span class="indicator-icon">🔔</span>
+      <span class="indicator-count">{{ notificationStore.unreadCount }}</span>
+    </div>
+
     <!-- Notification Prompt (outside device frame) -->
     <div
       v-if="!petStore.notificationEnabled && canRequestNotification() && petStore.isAlive"
@@ -132,15 +142,21 @@
         <span class="btn-text">Enable Alerts</span>
       </button>
     </div>
+
+    <!-- In-App Notifications -->
+    <AppNotifications />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { usePetStore } from './stores/petStore'
+import { useNotificationStore } from './stores/notificationStore'
 import PetScene from './components/PetScene.vue'
+import AppNotifications from './components/AppNotifications.vue'
 
 const petStore = usePetStore()
+const notificationStore = useNotificationStore()
 
 // Time of day tracking
 type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night'
@@ -197,18 +213,27 @@ function handleCButton() {
 }
 
 function canRequestNotification(): boolean {
-  // iOS doesn't support Notification API in regular browser mode
-  // Show button anyway - the request function handles failure gracefully
-  return 'Notification' in window ? Notification.permission === 'default' : true
+  // Don't show button on iOS Safari (Notification API not supported)
+  const ua = window.navigator.userAgent
+  const isIOS = /iPad|iPhone|iPod/.test(ua)
+  const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS/.test(ua)
+
+  if (isIOS && isSafari) {
+    return false // Hide button on iOS Safari
+  }
+
+  // Show button on other platforms if permission is default
+  return 'Notification' in window && Notification.permission === 'default'
 }
 
 async function requestNotificationPermission() {
   const success = await petStore.requestNotificationPermission()
-  if (!success && !('Notification' in window)) {
-    // Show toast for unsupported browsers (e.g., iOS Safari)
-    showToast(
-      '⚠️ Notifications not supported on this device. Try adding to home screen or using a different browser.'
-    )
+  if (!success) {
+    if (!('Notification' in window)) {
+      showToast('ℹ️ Using in-app notifications instead! Check the 🔔 bell icon for alerts.')
+    } else if (Notification.permission === 'denied') {
+      showToast('⚠️ Notifications blocked. Enable in browser settings or use in-app notifications.')
+    }
   }
 }
 
@@ -848,6 +873,54 @@ onUnmounted(() => {
 .notification-toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Notification Indicator */
+.notification-indicator {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 40;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 9999px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+}
+
+.indicator-icon {
+  font-size: 0.75rem;
+  line-height: 1;
+  margin-bottom: -2px;
+}
+
+.indicator-count {
+  font-size: 0.75rem;
+  line-height: 1;
+  font-family: 'Press Start 2P', cursive;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.notification-indicator {
+  animation: pulse 1.5s infinite;
 }
 
 /* Responsive */
