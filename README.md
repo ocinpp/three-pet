@@ -39,10 +39,11 @@ A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience rai
 
 ### 💤 Smart Features
 - **Offline Time Calculation** - Pet continues to age even when tab is closed!
-  - Saves state to localStorage
+  - Saves state to localStorage with multiple triggers (visibility change, page hide, blur, periodic auto-save)
   - Simulates missed ticks when you return
   - Capped at 1 hour maximum to prevent excessive aging
-  - Tracks time when browser is throttled
+  - Double-save protection (before and after offline processing)
+  - Mobile-optimized with iOS Safari specific workarounds
 - **Browser Notifications** - Get alerted when your pet needs attention:
   - 🍖 Hungry alerts
   - 🤒 Sick alerts
@@ -420,13 +421,27 @@ For custom models, create them in [MagicaVoxel](https://ephtracy.github.io/) and
 
 ## 📱 Browser Compatibility
 
+### Desktop
 - ✅ Chrome/Edge (full support)
 - ✅ Firefox (full support)
 - ✅ Safari desktop (full support)
-- ⚠️ iOS Safari (notifications not supported in browser mode - requires PWA/home screen installation)
-- ✅ Mobile browsers (optimized for mobile with responsive design)
 
-**Note for iOS users**: The Notification API is not available in iOS Safari's regular browser mode. The "Enable Alerts" button will appear but tapping it will show a helpful message. For full notification support on iOS, add the site to your home screen as a Progressive Web App (PWA).
+### Mobile
+- ✅ iOS Safari (optimized - see mobile notes below)
+- ✅ Chrome Android (full support)
+- ✅ Samsung Internet (full support)
+
+### Mobile Optimizations
+The game includes special features to handle mobile browser quirks:
+- **Multiple save triggers** - State saves on visibility change, page hide, tab blur, focus, resume, freeze events
+- **Periodic auto-save** - Backup save every 30 seconds
+- **iOS Safari workarounds** - Delayed double-save for iOS Safari's unreliable event firing
+- **State validation** - Detects and recovers from corrupted localStorage data
+- **Mobile meta tags** - Optimized viewport, iOS web app support, theme color
+
+**Note for iOS users**: The Notification API is not available in iOS Safari's regular browser mode. The "Enable Alerts" button will appear but tapping it will show a helpful toast message. For full notification support on iOS, add the site to your home screen.
+
+**Mobile behavior**: When switching apps or locking your phone, the pet continues to age in the background (up to 1 hour cap). When you return, offline time is processed and stats are updated accordingly.
 
 ## 🙏 Credits
 

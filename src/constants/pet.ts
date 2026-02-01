@@ -69,3 +69,8 @@ export const POOP = {
 export const SLEEP = {
   ENERGY_RECOVERY: 2, // Energy recovered per tick while sleeping
 } as const
+
+// Auto-save settings
+export const AUTO_SAVE = {
+  INTERVAL: 30000, // Save every 30 seconds (backup protection)
+} as const

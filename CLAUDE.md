@@ -119,12 +119,24 @@ src/
 #### State Persistence
 - State saved to `localStorage` key `'three-pet-state'`
 - Includes: all stats, age, life stage, evolution type, care quality tracking
-- Saves on: page visibility change (hidden), beforeunload
+- **Multiple save triggers for reliability**:
+  - `visibilitychange` event (tab hidden/visible)
+  - `pagehide` event (more reliable than beforeunload on mobile)
+  - `freeze` event (browser freezing page to save memory)
+  - `resume` event (browser thawing frozen page)
+  - `focus` event (tab gains focus)
+  - `blur` event (tab loses focus)
+  - `beforeunload` event (page closing)
+  - **Periodic auto-save** every 30 seconds (`AUTO_SAVE.INTERVAL`)
+- **iOS Safari workaround**: Delayed double-save (100ms) when page hides
+- **State validation**: `loadState()` validates required fields before accepting data
 
 #### Offline Time Calculation
 - Uses `lastActiveTime` timestamp to calculate elapsed seconds
 - On page visibility change (visible), loads saved state and simulates missed ticks
+- **Double-save protection**: Saves state before AND after processing offline ticks
 - Calls `tick()` function in a loop to catch up on elapsed time
+- Capped at 1 hour (3600 seconds) to prevent excessive aging
 - Important: Pet continues to age even when tab is closed
 
 #### Notification System
@@ -205,14 +217,33 @@ Key constants for gameplay tuning:
 - `EVOLUTION_QUALITY`: Minimum average stats for perfect/good/normal evolution
 - `ACTIONS`: Amount restored by feed/play actions
 - `POOP`: Spawn mechanics (2% chance per tick after 45s, max 8)
+- `AUTO_SAVE`: Periodic save interval (30000ms = 30 seconds)
 
 ### Important Implementation Details
 
 #### Browser APIs Used
 - **Page Visibility API**: Detects when tab is hidden/visible for offline time calculation
+- **Page Lifecycle Events**:
+  - `pagehide` - More reliable than `beforeunload` on mobile
+  - `freeze` - Browser freezing page to save memory
+  - `resume` - Browser thawing frozen page
+- **Focus/Blur Events**: Detect tab switching for additional state saves
 - **Notification API**: Native browser notifications
 - **localStorage**: Persistent state saving
 - **requestAnimationFrame**: Smooth 60fps animations
+
+#### Mobile Browser Considerations
+- **iOS Safari**: Event firing is unreliable, uses delayed double-save workaround
+- **Android Chrome**: Works well with standard Page Visibility API
+- **Timer Throttling**: Background tabs throttle `setInterval` - relies on timestamp calculation instead
+- **Process Killing**: Mobile browsers may kill background tabs - periodic auto-save provides backup
+- **localStorage Clearing**: Some browsers clear localStorage on force-quit - state validation handles this
+
+#### State Validation & Recovery
+- `loadState()` returns `boolean` to indicate success/failure
+- Validates required fields (`lifeStage`, `age`) before accepting state
+- Uses nullish coalescing (`??`) for all optional fields with safe defaults
+- Logs errors to console for debugging mobile issues
 
 #### Vue Watchers vs Computed
 - Use `computed` for derived state (mood, evolution type)
@@ -231,3 +262,40 @@ Key constants for gameplay tuning:
 #### Testing Features
 - Click time badge in App.vue to cycle through times of day
 - Game runs at 1 second = 1 game second (can be sped up by modifying tick interval)
+
+## Mobile Browser Testing
+
+### Testing Checklist
+
+#### Desktop Testing
+1. Open browser DevTools console
+2. Switch to another tab and back - check console for event logs
+3. Close tab and reopen - state should be preserved
+4. Wait 30+ seconds - verify "Auto-saved state" appears in console
+
+#### iOS Safari Testing
+1. Switch to another tab and back - pet should have aged
+2. Lock phone, unlock after 1 minute - offline time should be processed
+3. Switch to another app, return - state preserved
+4. Force-quit Safari, reopen - state should load (may not always work due to iOS limitations)
+5. Rotate device - state preserved
+
+#### Android Chrome Testing
+1. Same scenarios as iOS Safari
+2. Test with battery saver mode on/off
+
+### Console Logging
+The game logs various events for debugging mobile issues:
+- `State loaded successfully` - State loaded from localStorage
+- `No saved state found` - Fresh start
+- `Processing Xs offline time...` - Offline time being processed
+- `Page hidden - saving state` - Visibility change triggered save
+- `Page visible - loading state` - Visibility change triggered load
+- `iOS Safari detected - forcing save` - iOS workaround triggered
+- `Auto-saved state` - Periodic backup save (every 30s)
+- `Page hiding/freezing/blurring/focused/etc.` - Various event triggers
+
+### Known Limitations
+- **iOS Safari** - Can still lose state if browser is force-quit and localStorage is cleared (OS-level limitation)
+- **Timer Throttling** - Background tabs may throttle setInterval, but timestamp calculation compensates
+- **Max Offline Cap** - Only processes up to 1 hour of offline time to prevent excessive aging
