@@ -12,6 +12,7 @@ import {
   SLEEP,
   AUTO_SAVE,
 } from '../constants/pet'
+import { useNotificationStore, type AppNotification } from './notificationStore'
 
 export const usePetStore = defineStore('pet', () => {
   // Types
@@ -94,22 +95,34 @@ export const usePetStore = defineStore('pet', () => {
 
   // Send notification with cooldown to avoid spam
   function sendNotification(type: string, title: string, body: string, cooldownMs = 60000) {
-    if (!notificationEnabled.value) return
-
     const now = Date.now()
     const lastSent = lastNotificationTime.value[type] || 0
 
     // Check cooldown (default 1 minute)
     if (now - lastSent < cooldownMs) return
 
-    // Send notification
-    if (Notification.permission === 'granted') {
+    // Try browser notification first
+    if (
+      notificationEnabled.value &&
+      'Notification' in window &&
+      Notification.permission === 'granted'
+    ) {
       new Notification(title, {
         body,
         icon: '/favicon.ico',
         badge: '/favicon.ico',
-        tag: type, // Prevents duplicate notifications
+        tag: type,
       })
+      lastNotificationTime.value[type] = now
+    } else if ('Notification' in window && Notification.permission === 'denied') {
+      // User denied browser notifications, use in-app instead
+      const appNotificationStore = useNotificationStore()
+      appNotificationStore.addNotification(type as AppNotification['type'], title, body)
+      lastNotificationTime.value[type] = now
+    } else if (!('Notification' in window)) {
+      // Browser doesn't support Notification API (iOS Safari), use in-app
+      const appNotificationStore = useNotificationStore()
+      appNotificationStore.addNotification(type as AppNotification['type'], title, body)
       lastNotificationTime.value[type] = now
     }
   }

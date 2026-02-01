@@ -44,7 +44,7 @@ A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience rai
   - Capped at 1 hour maximum to prevent excessive aging
   - Double-save protection (before and after offline processing)
   - Mobile-optimized with iOS Safari specific workarounds
-- **Browser Notifications** - Get alerted when your pet needs attention:
+- **Hybrid Notification System** - Get alerted when your pet needs attention:
   - 🍖 Hungry alerts
   - 🤒 Sick alerts
   - 😴 Sleepy alerts
@@ -52,9 +52,15 @@ A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience rai
   - 🤢 Dirty alerts (poop needs cleaning)
   - ✨ Evolution notifications
   - 💀 Death notifications
+  - **Primary**: Browser notifications (desktop, Android Chrome)
+  - **Fallback**: In-app notifications (iOS Safari, permission denied, unsupported browsers)
+  - **Visual indicator**: 🔔 Bell icon with unread count (pulsing animation)
   - Only triggers when tab is inactive (won't annoy you while playing)
 - **Cooldown System** - Prevents notification spam (1 minute per type)
-- **iOS-Friendly Prompts** - Toast notifications inform users when features aren't supported on their device
+- **Smart Detection**: "Enable Alerts" button automatically hidden on iOS Safari where browser notifications aren't supported
+- **In-App Notifications**: Beautiful slide-in cards with colors and icons for each notification type
+  - Click to dismiss, auto-dismiss after 5 minutes
+  - Shows timestamp for each notification
 
 ### 🎭 Mood System
 Your pet shows different moods with unique colors:
@@ -158,30 +164,38 @@ Your pet shows different moods with unique colors:
 ```
 src/
 ├── components/
-│   └── PetScene.vue          # Three.js 3D scene with all life stage models
-│                              # - Time-of-day lighting system
-│                              # - Smooth background transitions
-│                              # - Particle effects
-│                              # - All voxel models (egg, baby, child, adult, elder)
+│   ├── PetScene.vue          # Three.js 3D scene with all life stage models
+│   │                         # - Time-of-day lighting system
+│   │                         # - Smooth background transitions
+│   │                         # - Particle effects
+│   │                         # - All voxel models (egg, baby, child, adult, elder)
+│   └── AppNotifications.vue  # In-app notification component
+│                             # - Slide-in notification cards with icons and colors
+│                             # - Auto-dismiss after 5 minutes
+│                             # - Click-to-dismiss functionality
 ├── stores/
-│   └── petStore.ts           # Pet state, evolution logic, game loop
-│                              # - Offline time calculation
-│                              # - Notification system
-│                              # - Care quality tracking
-│                              # - Lifecycle management
+│   ├── petStore.ts           # Pet state, evolution logic, game loop
+│   │                         # - Offline time calculation
+│   │                         # - Hybrid notification system
+│   │                         # - Care quality tracking
+│   │                         # - Lifecycle management
+│   └── notificationStore.ts  # In-app notification state management
+│                             # - Notifications list with unread count
+│                             # - Add, dismiss, mark as read methods
 ├── constants/
 │   └── pet.ts                # Game balance constants
-│                              # - Evolution timings
-│                              # - Decay rates
-│                              # - Thresholds
-│                              # - Action values
+│                             # - Evolution timings
+│                             # - Decay rates
+│                             # - Thresholds
+│                             # - Action values
 ├── App.vue                   # Tamagotchi-style device interface
-│                              # - Egg-shaped device frame
-│                              # - LCD screen container with overlay stats
-│                              # - Physical A/B/C control buttons
-│                              # - RESET button (retro pin reset style)
-│                              # - Time-of-day badge
-│                              # - Notification prompt
+│                             # - Egg-shaped device frame
+│                             # - LCD screen container with overlay stats
+│                             # - Physical A/B/C control buttons
+│                             # - RESET button (retro pin reset style)
+│                             # - Time-of-day badge
+│                             # - Notification indicator badge (🔔)
+│                             # - Smart "Enable Alerts" button (hidden on iOS)
 └── main.ts                   # App entry point, Pinia setup
 ```
 
@@ -438,10 +452,11 @@ The game includes special features to handle mobile browser quirks:
 - **iOS Safari workarounds** - Delayed double-save for iOS Safari's unreliable event firing
 - **State validation** - Detects and recovers from corrupted localStorage data
 - **Mobile meta tags** - Optimized viewport, iOS web app support, theme color
+- **Hybrid notifications** - In-app notification fallback ensures all users receive alerts
 
-**Note for iOS users**: The Notification API is not available in iOS Safari's regular browser mode. The "Enable Alerts" button will appear but tapping it will show a helpful toast message. For full notification support on iOS, add the site to your home screen.
+**Note for iOS users**: iOS Safari doesn't support the browser Notification API in regular mode. The game automatically uses in-app notifications (slide-in cards) for iOS users. The "Enable Alerts" button is hidden on iOS Safari to avoid confusion.
 
-**Mobile behavior**: When switching apps or locking your phone, the pet continues to age in the background (up to 1 hour cap). When you return, offline time is processed and stats are updated accordingly.
+**Mobile behavior**: When switching apps or locking your phone, the pet continues to age in the background (up to 1 hour cap). When you return, offline time is processed and stats are updated accordingly. In-app notifications will appear if your pet needs attention while you were away.
 
 ## 🙏 Credits
 
