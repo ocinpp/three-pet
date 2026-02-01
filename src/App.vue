@@ -67,7 +67,7 @@
         <div class="physical-buttons">
           <button
             @click="petStore.feed()"
-            :disabled="!petStore.isAlive || petStore.isSleeping"
+            :disabled="!petStore.isAlive || petStore.isSleeping || petStore.lifeStage === 'egg'"
             class="physical-btn btn-a"
             aria-label="Feed pet"
           >
@@ -77,7 +77,7 @@
 
           <button
             @click="petStore.play()"
-            :disabled="!petStore.isAlive || petStore.isSleeping"
+            :disabled="!petStore.isAlive || petStore.isSleeping || petStore.lifeStage === 'egg'"
             class="physical-btn btn-b"
             aria-label="Play with pet"
           >
@@ -87,7 +87,7 @@
 
           <button
             @click="handleCButton"
-            :disabled="!petStore.isAlive || (petStore.isSleeping && petStore.poopCount === 0)"
+            :disabled="!petStore.isAlive || petStore.lifeStage === 'egg'"
             class="physical-btn btn-c"
             aria-label="Clean or sleep"
           >
@@ -197,11 +197,40 @@ function handleCButton() {
 }
 
 function canRequestNotification(): boolean {
-  return 'Notification' in window && Notification.permission === 'default'
+  // iOS doesn't support Notification API in regular browser mode
+  // Show button anyway - the request function handles failure gracefully
+  return 'Notification' in window ? Notification.permission === 'default' : true
 }
 
 async function requestNotificationPermission() {
-  await petStore.requestNotificationPermission()
+  const success = await petStore.requestNotificationPermission()
+  if (!success && !('Notification' in window)) {
+    // Show toast for unsupported browsers (e.g., iOS Safari)
+    showToast(
+      '⚠️ Notifications not supported on this device. Try adding to home screen or using a different browser.'
+    )
+  }
+}
+
+function showToast(message: string) {
+  const existingToast = document.querySelector('.notification-toast')
+  if (existingToast) {
+    existingToast.remove()
+  }
+
+  const toast = document.createElement('div')
+  toast.className = 'notification-toast'
+  toast.textContent = message
+  document.body.appendChild(toast)
+
+  setTimeout(() => {
+    toast.classList.add('show')
+  }, 10)
+
+  setTimeout(() => {
+    toast.classList.remove('show')
+    setTimeout(() => toast.remove(), 300)
+  }, 5000)
 }
 
 function getStatLevel(value: number): 'high' | 'medium' | 'low' | 'critical' {
@@ -793,6 +822,32 @@ onUnmounted(() => {
   font-size: 0.75rem;
   font-weight: 700;
   color: #fff;
+}
+
+/* Toast Notification */
+.notification-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.3s ease;
+  max-width: 90vw;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.notification-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* Responsive */

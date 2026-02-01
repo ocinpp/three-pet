@@ -53,6 +53,7 @@ A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience rai
   - 💀 Death notifications
   - Only triggers when tab is inactive (won't annoy you while playing)
 - **Cooldown System** - Prevents notification spam (1 minute per type)
+- **iOS-Friendly Prompts** - Toast notifications inform users when features aren't supported on their device
 
 ### 🎭 Mood System
 Your pet shows different moods with unique colors:
@@ -84,6 +85,7 @@ Your pet shows different moods with unique colors:
   - Put pet to sleep (restores energy +2/sec)
   - Wake pet up when sleeping
 - **RESET Button** - Clears all saved progress and restarts with a fresh egg (retro pin reset style)
+- **Note**: All A/B/C buttons are disabled while pet is an egg (waiting to hatch)
 
 ### Basic Care
 1. **Wait to Hatch** - Egg takes 30 seconds to hatch
@@ -419,8 +421,11 @@ For custom models, create them in [MagicaVoxel](https://ephtracy.github.io/) and
 
 - ✅ Chrome/Edge (full support)
 - ✅ Firefox (full support)
-- ✅ Safari (notifications may require user interaction)
-- ✅ Mobile (optimized for mobile with responsive design)
+- ✅ Safari desktop (full support)
+- ⚠️ iOS Safari (notifications not supported in browser mode - requires PWA/home screen installation)
+- ✅ Mobile browsers (optimized for mobile with responsive design)
+
+**Note for iOS users**: The Notification API is not available in iOS Safari's regular browser mode. The "Enable Alerts" button will appear but tapping it will show a helpful message. For full notification support on iOS, add the site to your home screen as a Progressive Web App (PWA).
 
 ## 🙏 Credits
 
