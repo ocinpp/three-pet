@@ -99,22 +99,22 @@ function getGroundColor(): number {
 // Get light intensity based on time of day
 function getLightIntensity(): { ambient: number; directional: number } {
   if (petStore.isSleeping) {
-    return { ambient: 0.1, directional: 0.1 }
+    return { ambient: 0.9, directional: 0.3 }
   }
 
   const timeOfDay = getTimeOfDay()
 
   switch (timeOfDay) {
     case 'morning':
-      return { ambient: 0.5, directional: 0.6 }
+      return { ambient: 1.0, directional: 0.8 }
     case 'afternoon':
-      return { ambient: 0.6, directional: 0.8 }
+      return { ambient: 1.0, directional: 1.0 }
     case 'evening':
-      return { ambient: 0.4, directional: 0.5 }
+      return { ambient: 0.95, directional: 0.7 }
     case 'night':
-      return { ambient: 0.2, directional: 0.3 }
+      return { ambient: 0.9, directional: 0.5 }
     default:
-      return { ambient: 0.6, directional: 0.8 }
+      return { ambient: 1.0, directional: 1.0 }
   }
 }
 
@@ -170,10 +170,10 @@ function createBabyPet(): THREE.Group {
   const v = 0.5
   const color = getPetColor()
 
-  const bodyMaterial = new THREE.MeshLambertMaterial({ color })
-  const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 })
-  const eyeHighlightMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff })
-  const blushMaterial = new THREE.MeshLambertMaterial({ color: 0xffb6c1 })
+  const bodyMaterial = new THREE.MeshBasicMaterial({ color })
+  const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
+  const eyeHighlightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
+  const blushMaterial = new THREE.MeshBasicMaterial({ color: 0xffb6c1 })
 
   // Chibi body - larger head area
   for (let x = -1; x <= 1; x++) {
@@ -190,7 +190,7 @@ function createBabyPet(): THREE.Group {
   }
 
   // HUGE sparkly eyes
-  const eyeWhiteMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff })
+  const eyeWhiteMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
   const eyeSize = v * 1.2
 
   // Left eye
@@ -248,7 +248,7 @@ function createBabyPet(): THREE.Group {
 
   // Tiny cute beak
   const beakGeometry = new THREE.BoxGeometry(v * 0.3, v * 0.25, v * 0.25)
-  const beakMaterial = new THREE.MeshLambertMaterial({ color: 0xffa500 })
+  const beakMaterial = new THREE.MeshBasicMaterial({ color: 0xffa500 })
   const beak = new THREE.Mesh(beakGeometry, beakMaterial)
   beak.position.set(0, v * 0.4, v * 1.4)
   group.add(beak)
@@ -274,7 +274,7 @@ function createBabyPet(): THREE.Group {
   group.add(rightFoot)
 
   // Small top tuft
-  const tuftMaterial = new THREE.MeshLambertMaterial({ color: 0xffe4b5 })
+  const tuftMaterial = new THREE.MeshBasicMaterial({ color: 0xffe4b5 })
   const tuft = new THREE.Mesh(new THREE.BoxGeometry(v * 0.3, v * 0.3, v * 0.3), tuftMaterial)
   tuft.position.set(0, v * 1.8, 0)
   group.add(tuft)
@@ -289,11 +289,11 @@ function createChildPet(): THREE.Group {
   const v = 0.5
   const color = getPetColor()
 
-  const bodyMaterial = new THREE.MeshLambertMaterial({ color })
-  const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 })
-  const eyeHighlightMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff })
-  const blushMaterial = new THREE.MeshLambertMaterial({ color: 0xffb6c1 })
-  const bellyMaterial = new THREE.MeshLambertMaterial({ color: 0xfff0f5 })
+  const bodyMaterial = new THREE.MeshBasicMaterial({ color })
+  const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
+  const eyeHighlightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
+  const blushMaterial = new THREE.MeshBasicMaterial({ color: 0xffb6c1 })
+  const bellyMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0f5 })
 
   // Chibi round body - bigger head, smaller body
   for (let x = -2; x <= 2; x++) {
@@ -324,7 +324,7 @@ function createChildPet(): THREE.Group {
   }
 
   // GIANT sparkly anime eyes
-  const eyeWhiteMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff })
+  const eyeWhiteMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
   const eyeSize = v * 1.5
 
   // Left eye
@@ -395,7 +395,7 @@ function createChildPet(): THREE.Group {
   group.add(rightBlush)
 
   // Cute tiny smile (shaped like a 'w')
-  const smileMaterial = new THREE.MeshLambertMaterial({ color: 0xff69b4 })
+  const smileMaterial = new THREE.MeshBasicMaterial({ color: 0xff69b4 })
   const leftSmile = new THREE.Mesh(
     new THREE.BoxGeometry(v * 0.25, v * 0.15, v * 0.15),
     smileMaterial
@@ -433,7 +433,7 @@ function createChildPet(): THREE.Group {
   group.add(rightFoot)
 
   // Cute hair tuft
-  const tuftMaterial = new THREE.MeshLambertMaterial({ color: 0xffe4b5 })
+  const tuftMaterial = new THREE.MeshBasicMaterial({ color: 0xffe4b5 })
   const tuft1 = new THREE.Mesh(new THREE.BoxGeometry(v * 0.3, v * 0.3, v * 0.3), tuftMaterial)
   tuft1.position.set(-v * 0.3, v * 2.7, 0)
   group.add(tuft1)
@@ -456,11 +456,11 @@ function createAdultPet(): THREE.Group {
   const v = 0.5
   const color = getPetColor()
 
-  const bodyMaterial = new THREE.MeshLambertMaterial({ color })
-  const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 })
-  const eyeHighlightMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff })
-  const blushMaterial = new THREE.MeshLambertMaterial({ color: 0xffb6c1 })
-  const bellyMaterial = new THREE.MeshLambertMaterial({ color: 0xfff0f5 })
+  const bodyMaterial = new THREE.MeshBasicMaterial({ color })
+  const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
+  const eyeHighlightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
+  const blushMaterial = new THREE.MeshBasicMaterial({ color: 0xffb6c1 })
+  const bellyMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0f5 })
 
   // Cute chubby body
   for (let x = -2; x <= 2; x++) {
@@ -491,7 +491,7 @@ function createAdultPet(): THREE.Group {
   }
 
   // Big beautiful eyes
-  const eyeWhiteMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff })
+  const eyeWhiteMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
   const eyeSize = v * 1.3
 
   // Left eye
@@ -565,7 +565,7 @@ function createAdultPet(): THREE.Group {
   group.add(rightBlush)
 
   // Happy smile
-  const smileMaterial = new THREE.MeshLambertMaterial({ color: 0xff69b4 })
+  const smileMaterial = new THREE.MeshBasicMaterial({ color: 0xff69b4 })
   const smile = new THREE.Mesh(new THREE.BoxGeometry(v * 0.6, v * 0.15, v * 0.15), smileMaterial)
   smile.position.set(0, v * 0.9, v * 2.6)
   group.add(smile)
@@ -603,7 +603,7 @@ function createAdultPet(): THREE.Group {
   group.add(rightFoot)
 
   // Adorable hair tuft
-  const tuftMaterial = new THREE.MeshLambertMaterial({ color: 0xffe4b5 })
+  const tuftMaterial = new THREE.MeshBasicMaterial({ color: 0xffe4b5 })
   for (let i = -1; i <= 1; i++) {
     const tuft = new THREE.Mesh(new THREE.BoxGeometry(v * 0.3, v * 0.5, v * 0.3), tuftMaterial)
     tuft.position.set(i * v * 0.5, v * 3.5, 0)
@@ -621,12 +621,12 @@ function createElderPet(): THREE.Group {
 
   // Elder pets are wiser
   const baseColor = getPetColor()
-  const bodyMaterial = new THREE.MeshLambertMaterial({ color: baseColor })
-  const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 })
-  const eyeHighlightMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff })
-  const blushMaterial = new THREE.MeshLambertMaterial({ color: 0xffb6c1 })
-  const glassesMaterial = new THREE.MeshLambertMaterial({ color: 0x4a4a4a })
-  const bellyMaterial = new THREE.MeshLambertMaterial({ color: 0xfff0f5 })
+  const bodyMaterial = new THREE.MeshBasicMaterial({ color: baseColor })
+  const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
+  const eyeHighlightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
+  const blushMaterial = new THREE.MeshBasicMaterial({ color: 0xffb6c1 })
+  const glassesMaterial = new THREE.MeshBasicMaterial({ color: 0x4a4a4a })
+  const bellyMaterial = new THREE.MeshBasicMaterial({ color: 0xfff0f5 })
 
   // Wise round body
   for (let x = -2; x <= 2; x++) {
@@ -657,7 +657,7 @@ function createElderPet(): THREE.Group {
   }
 
   // Kind wise eyes
-  const eyeWhiteMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff })
+  const eyeWhiteMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
   const eyeSize = v * 1.2
 
   // Left eye
@@ -734,7 +734,7 @@ function createElderPet(): THREE.Group {
   group.add(rightBlush)
 
   // Warm gentle smile
-  const smileMaterial = new THREE.MeshLambertMaterial({ color: 0xff69b4 })
+  const smileMaterial = new THREE.MeshBasicMaterial({ color: 0xff69b4 })
   const smile = new THREE.Mesh(new THREE.BoxGeometry(v * 0.5, v * 0.12, v * 0.12), smileMaterial)
   smile.position.set(0, v * 0.85, v * 2.5)
   group.add(smile)
@@ -762,7 +762,7 @@ function createElderPet(): THREE.Group {
   group.add(rightFoot)
 
   // Wise hair tuft (smaller, more refined)
-  const tuftMaterial = new THREE.MeshLambertMaterial({ color: 0xd3d3d3 })
+  const tuftMaterial = new THREE.MeshBasicMaterial({ color: 0xd3d3d3 })
   const tuft1 = new THREE.Mesh(new THREE.BoxGeometry(v * 0.25, v * 0.4, v * 0.25), tuftMaterial)
   tuft1.position.set(0, v * 3.2, 0)
   group.add(tuft1)

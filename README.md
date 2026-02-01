@@ -133,7 +133,8 @@ Your pet shows different moods with unique colors:
 ### 3D Graphics
 - **Three.js** (v0.173.0) - 3D rendering engine
   - WebGLRenderer for hardware acceleration
-  - MeshLambertMaterial for voxel-style lighting
+  - MeshBasicMaterial for pet (bright, vibrant colors unaffected by lighting)
+  - MeshLambertMaterial for ground and environment (subtle shading)
   - BoxGeometry for voxel construction
   - Particle systems for effects
   - Smooth color transitions with lerp()
