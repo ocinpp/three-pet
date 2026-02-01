@@ -128,18 +128,18 @@ function createEgg(): THREE.Group {
 
   // Smooth egg silhouette - wider bottom, cut top 2 layers
   const eggRadii = [
-    2.0,  // 0 - bottom (much wider!)
-    2.8,  // 1
-    3.3,  // 2
-    3.6,  // 3
-    3.8,  // 4 - max width
-    3.8,  // 5 - max width sustained
-    3.6,  // 6
-    3.3,  // 7
-    2.9,  // 8
-    2.5,  // 9
-    2.1,  // 10
-    1.7,  // 11 - cut here (removed top 2 layers)
+    2.0, // 0 - bottom (much wider!)
+    2.8, // 1
+    3.3, // 2
+    3.6, // 3
+    3.8, // 4 - max width
+    3.8, // 5 - max width sustained
+    3.6, // 6
+    3.3, // 7
+    2.9, // 8
+    2.5, // 9
+    2.1, // 10
+    1.7, // 11 - cut here (removed top 2 layers)
   ]
 
   const height = eggRadii.length

@@ -10,12 +10,21 @@ import {
   HATCHING,
   POOP,
   SLEEP,
+  AUTO_SAVE,
 } from '../constants/pet'
 
 export const usePetStore = defineStore('pet', () => {
   // Types
   type LifeStage = 'egg' | 'baby' | 'child' | 'adult' | 'elder'
   type EvolutionType = 'perfect' | 'good' | 'normal' | 'bad'
+
+  // Helper to detect iOS Safari
+  function isIOSSafari(): boolean {
+    const ua = window.navigator.userAgent
+    const isIOS = /iPad|iPhone|iPod/.test(ua)
+    const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS/.test(ua)
+    return isIOS && isSafari
+  }
 
   // State
   const hunger = ref(100)
@@ -51,6 +60,7 @@ export const usePetStore = defineStore('pet', () => {
   })
 
   let tickInterval: number | null = null
+  let autoSaveInterval: number | null = null
 
   // Request notification permission
   async function requestNotificationPermission(): Promise<boolean> {
@@ -173,11 +183,18 @@ export const usePetStore = defineStore('pet', () => {
   }
 
   // Load state from localStorage
-  function loadState() {
+  function loadState(): boolean {
     const saved = localStorage.getItem('three-pet-state')
     if (saved) {
       try {
         const state = JSON.parse(saved)
+
+        // Validate state has minimum required fields
+        if (!state.lifeStage || typeof state.age !== 'number') {
+          console.error('Invalid state detected, starting fresh')
+          return false
+        }
+
         hunger.value = state.hunger ?? 100
         happiness.value = state.happiness ?? 100
         health.value = state.health ?? 100
@@ -191,12 +208,15 @@ export const usePetStore = defineStore('pet', () => {
         totalCareScore.value = state.totalCareScore ?? 0
         careSamples.value = state.careSamples ?? 0
         lastActiveTime.value = state.lastActiveTime ?? Date.now()
+
+        console.log('State loaded successfully')
         return true
       } catch (e) {
         console.error('Failed to load state:', e)
         return false
       }
     }
+    console.log('No saved state found')
     return false
   }
 
@@ -213,13 +233,19 @@ export const usePetStore = defineStore('pet', () => {
       const secondsToSimulate = Math.min(elapsedSeconds, maxOfflineSeconds)
 
       console.log(
-        `Processing ${secondsToSimulate} seconds of offline time (was ${elapsedSeconds}s total)...`
+        `Processing ${secondsToSimulate}s offline time (was ${elapsedSeconds}s total, ${Math.floor(elapsedSeconds / 60)}min)`
       )
+
+      // Save state BEFORE processing in case processing fails
+      saveState()
 
       // Simulate each second that passed
       for (let i = 0; i < secondsToSimulate; i++) {
         tick()
       }
+
+      // Save state AFTER processing to ensure updated state is persisted
+      saveState()
     }
 
     // Update last active time
@@ -230,15 +256,56 @@ export const usePetStore = defineStore('pet', () => {
   function handleVisibilityChange() {
     if (document.hidden) {
       // Page is hidden, save current state
+      console.log('Page hidden - saving state')
       saveState()
+
+      // iOS Safari: Force immediate save with delay
+      if (isIOSSafari()) {
+        console.log('iOS Safari detected - forcing save')
+        setTimeout(() => saveState(), 100)
+      }
     } else {
       // Page is visible again, load and process offline time
+      console.log('Page visible - loading state')
       const hadState = loadState()
       if (hadState) {
         processOfflineTime()
       }
       lastActiveTime.value = Date.now()
     }
+  }
+
+  // Handle page hide (more reliable on mobile than beforeunload)
+  function handlePageHide() {
+    console.log('Page hiding - saving state')
+    saveState()
+  }
+
+  // Handle page freeze (browser freezing the page to save memory)
+  function handleFreeze() {
+    console.log('Page freezing - saving state')
+    saveState()
+  }
+
+  // Handle page resume (browser thawing the page)
+  function handleResume() {
+    console.log('Page resuming - loading state')
+    loadState()
+    processOfflineTime()
+  }
+
+  // Handle focus (tab gains focus)
+  function handleFocus() {
+    console.log('Page focused - checking state')
+    loadState()
+    processOfflineTime()
+    lastActiveTime.value = Date.now()
+  }
+
+  // Handle blur (tab loses focus)
+  function handleBlur() {
+    console.log('Page blurred - saving state')
+    saveState()
   }
 
   // Actions
@@ -479,14 +546,35 @@ export const usePetStore = defineStore('pet', () => {
 
     // Save state before the page is closed/unloaded
     window.addEventListener('beforeunload', saveState)
+
+    // Additional mobile-aware listeners
+    window.addEventListener('pagehide', handlePageHide)
+    document.addEventListener('freeze', handleFreeze)
+    document.addEventListener('resume', handleResume)
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('blur', handleBlur)
+
+    // Periodic auto-save as backup
+    autoSaveInterval = window.setInterval(() => {
+      saveState()
+      console.log('Auto-saved state')
+    }, AUTO_SAVE.INTERVAL)
   })
 
   onUnmounted(() => {
     if (tickInterval !== null) {
       clearInterval(tickInterval)
     }
+    if (autoSaveInterval !== null) {
+      clearInterval(autoSaveInterval)
+    }
     document.removeEventListener('visibilitychange', handleVisibilityChange)
     window.removeEventListener('beforeunload', saveState)
+    window.removeEventListener('pagehide', handlePageHide)
+    document.removeEventListener('freeze', handleFreeze)
+    document.removeEventListener('resume', handleResume)
+    window.removeEventListener('focus', handleFocus)
+    window.removeEventListener('blur', handleBlur)
   })
 
   return {
