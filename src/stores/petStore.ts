@@ -179,23 +179,29 @@ export const usePetStore = defineStore('pet', () => {
   }
 
   // Save state to localStorage
-  function saveState() {
-    const state = {
-      hunger: hunger.value,
-      happiness: happiness.value,
-      health: health.value,
-      energy: energy.value,
-      age: age.value,
-      lifeStage: lifeStage.value,
-      evolutionType: evolutionType.value,
-      isAlive: isAlive.value,
-      isSleeping: isSleeping.value,
-      poopCount: poopCount.value,
-      totalCareScore: totalCareScore.value,
-      careSamples: careSamples.value,
-      lastActiveTime: lastActiveTime.value,
+  function saveState(): boolean {
+    try {
+      const state = {
+        hunger: hunger.value,
+        happiness: happiness.value,
+        health: health.value,
+        energy: energy.value,
+        age: age.value,
+        lifeStage: lifeStage.value,
+        evolutionType: evolutionType.value,
+        isAlive: isAlive.value,
+        isSleeping: isSleeping.value,
+        poopCount: poopCount.value,
+        totalCareScore: totalCareScore.value,
+        careSamples: careSamples.value,
+        lastActiveTime: lastActiveTime.value,
+      }
+      localStorage.setItem('three-pet-state', JSON.stringify(state))
+      return true
+    } catch (e) {
+      console.error('Failed to save state:', e)
+      return false
     }
-    localStorage.setItem('three-pet-state', JSON.stringify(state))
   }
 
   // Trigger auto-save indicator
@@ -203,7 +209,7 @@ export const usePetStore = defineStore('pet', () => {
     isSaving.value = true
     setTimeout(() => {
       isSaving.value = false
-    }, 1000)
+    }, AUTO_SAVE.INDICATOR_DURATION)
   }
 
   // Load state from localStorage
@@ -339,7 +345,9 @@ export const usePetStore = defineStore('pet', () => {
     happiness.value = Math.min(100, happiness.value + ACTIONS.FEED_HAPPINESS)
     currentAction.value = 'eating'
     setTimeout(() => (currentAction.value = 'idle'), ACTIONS.ACTION_DURATION)
-    saveState()
+    if (saveState()) {
+      triggerAutoSaveIndicator()
+    }
   }
 
   function play() {
@@ -350,7 +358,9 @@ export const usePetStore = defineStore('pet', () => {
     hunger.value = Math.max(0, hunger.value - ACTIONS.PLAY_HUNGER_COST)
     currentAction.value = 'playing'
     setTimeout(() => (currentAction.value = 'idle'), ACTIONS.ACTION_DURATION)
-    saveState()
+    if (saveState()) {
+      triggerAutoSaveIndicator()
+    }
   }
 
   function sleep() {
@@ -362,14 +372,18 @@ export const usePetStore = defineStore('pet', () => {
       // Go to sleep
       isSleeping.value = true
     }
-    saveState()
+    if (saveState()) {
+      triggerAutoSaveIndicator()
+    }
   }
 
   function clean() {
     if (!isAlive.value) return
     poopCount.value = 0
     happiness.value = Math.min(100, happiness.value + 10)
-    saveState()
+    if (saveState()) {
+      triggerAutoSaveIndicator()
+    }
   }
 
   function revive() {
@@ -387,7 +401,9 @@ export const usePetStore = defineStore('pet', () => {
     poopCount.value = 0
     totalCareScore.value = 0
     careSamples.value = 0
-    saveState()
+    if (saveState()) {
+      triggerAutoSaveIndicator()
+    }
   }
 
   function reset() {
@@ -585,9 +601,10 @@ export const usePetStore = defineStore('pet', () => {
 
     // Periodic auto-save as backup
     autoSaveInterval = window.setInterval(() => {
-      saveState()
-      triggerAutoSaveIndicator()
-      console.log('Auto-saved state')
+      if (saveState()) {
+        triggerAutoSaveIndicator()
+        console.log('Auto-saved state')
+      }
     }, AUTO_SAVE.INTERVAL)
   })
 

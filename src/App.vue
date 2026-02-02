@@ -115,7 +115,13 @@
     </div>
 
     <!-- Auto-Save Indicator -->
-    <div v-if="petStore.isSaving" class="auto-save-indicator">
+    <div
+      v-if="petStore.isSaving"
+      class="auto-save-indicator"
+      role="status"
+      aria-live="polite"
+      aria-label="Game saved"
+    >
       <div class="save-dot"></div>
     </div>
 
@@ -952,7 +958,7 @@ onUnmounted(() => {
 /* Auto-Save Indicator */
 .auto-save-indicator {
   position: absolute;
-  bottom: 8px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;

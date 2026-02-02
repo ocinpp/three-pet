@@ -73,4 +73,5 @@ export const SLEEP = {
 // Auto-save settings
 export const AUTO_SAVE = {
   INTERVAL: 30000, // Save every 30 seconds (backup protection)
+  INDICATOR_DURATION: 1000, // Visual indicator animation duration (ms)
 } as const
