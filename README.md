@@ -65,6 +65,12 @@ A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience rai
 - **In-App Notifications**: Beautiful slide-in cards with colors and icons for each notification type
   - Click to dismiss, auto-dismiss after 5 minutes
   - Shows timestamp for each notification
+- **Auto-Save Indicator**: Visual feedback when game state is saved
+  - Green flash dot appears at bottom of device frame
+  - Triggers on user actions (feed, play, sleep, clean, revive) and periodic auto-save
+  - Smooth fade animation (1 second)
+  - Only shows when save succeeds (handles localStorage errors gracefully)
+  - Accessibility support with ARIA live region announcements
 
 ### 🎭 Mood System
 Your pet shows different moods with unique colors:
@@ -452,11 +458,12 @@ For custom models, create them in [MagicaVoxel](https://ephtracy.github.io/) and
 ### Mobile Optimizations
 The game includes special features to handle mobile browser quirks:
 - **Multiple save triggers** - State saves on visibility change, page hide, tab blur, focus, resume, freeze events
-- **Periodic auto-save** - Backup save every 30 seconds
+- **Periodic auto-save** - Backup save every 30 seconds with visual indicator
 - **iOS Safari workarounds** - Delayed double-save for iOS Safari's unreliable event firing
 - **State validation** - Detects and recovers from corrupted localStorage data
-- **Mobile meta tags** - Optimized viewport, iOS web app support, theme color
+- **Mobile meta tags** - Optimized viewport, mobile web app support, theme color
 - **Hybrid notifications** - In-app notification fallback ensures all users receive alerts
+- **Visual save feedback** - Green flash indicator confirms saves (works even on mobile)
 
 **Note for iOS users**: iOS Safari doesn't support the browser Notification API in regular mode. The game automatically uses in-app notifications (slide-in cards) for iOS users. The "Enable Alerts" button is hidden on iOS Safari to avoid confusion.
 
