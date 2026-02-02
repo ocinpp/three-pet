@@ -138,6 +138,15 @@ src/
   - **Periodic auto-save** every 30 seconds (`AUTO_SAVE.INTERVAL`)
 - **iOS Safari workaround**: Delayed double-save (100ms) when page hides
 - **State validation**: `loadState()` validates required fields before accepting data
+- **Auto-save indicator** (`App.vue`, `petStore.ts`):
+  - Green flash dot appears at bottom of device frame when state saves
+  - Triggers on: user actions (feed, play, sleep, clean, revive) + periodic auto-save
+  - Smooth fade animation with scale effect (1 second duration via `AUTO_SAVE.INDICATOR_DURATION`)
+  - Error handling: `saveState()` returns boolean, only shows indicator on success
+  - Accessibility: `role="status"`, `aria-live="polite"`, `aria-label="Game saved"`
+  - Timer cleanup: `saveIndicatorTimer` tracked and cleared in `onUnmounted()`
+  - Positioned at `bottom: 0` inside device-frame container
+  - CSS animation: `flashSave` keyframes with scale (1.5 → 1 → 0.5) and opacity fade
 
 #### Offline Time Calculation
 - Uses `lastActiveTime` timestamp to calculate elapsed seconds
@@ -222,6 +231,11 @@ src/
 #### App.vue
 - Main UI container with stat bars and action buttons
 - Manages time-of-day state (updates every 60 seconds)
+- **Auto-save indicator**:
+  - Green flash dot positioned at bottom of device frame
+  - Shows when `petStore.isSaving` is true
+  - CSS animation with scale and opacity fade
+  - Accessibility attributes for screen readers
 - **Hybrid notification integration**:
   - Imports `useNotificationStore` for in-app notifications
   - Displays notification indicator badge (🔔) with unread count
@@ -261,7 +275,7 @@ Key constants for gameplay tuning:
 - `EVOLUTION_QUALITY`: Minimum average stats for perfect/good/normal evolution
 - `ACTIONS`: Amount restored by feed/play actions
 - `POOP`: Spawn mechanics (2% chance per tick after 45s, max 8)
-- `AUTO_SAVE`: Periodic save interval (30000ms = 30 seconds)
+- `AUTO_SAVE`: Periodic save interval (30000ms = 30 seconds) and indicator duration (1000ms = 1 second)
 
 ### Important Implementation Details
 
