@@ -958,7 +958,7 @@ onUnmounted(() => {
 /* Auto-Save Indicator */
 .auto-save-indicator {
   position: absolute;
-  bottom: 20px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
