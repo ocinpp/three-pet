@@ -14,9 +14,9 @@ export const GROWTH_TIMING = {
 
 // Stat decay rates per tick (1 tick = 1 second)
 export const DECAY_RATES = {
-  HUNGER: 0.5,
-  HAPPINESS: 0.3,
-  ENERGY: 0.2,
+  HUNGER: 0.25, // 400s (6.7 min) to empty
+  HAPPINESS: 0.15, // 667s (11 min) to empty
+  ENERGY: 0.1, // 1000s (16.7 min) to empty
   HEALTH_DECAY: 1, // When needs are neglected
   HEALTH_REGEN: 0.5, // When needs are met
 } as const
