@@ -112,17 +112,17 @@
           <span class="restart-text">RESET</span>
         </button>
       </div>
-    </div>
 
-    <!-- Auto-Save Indicator -->
-    <div
-      v-if="petStore.isSaving"
-      class="auto-save-indicator"
-      role="status"
-      aria-live="polite"
-      aria-label="Game saved"
-    >
-      <div class="save-dot"></div>
+      <!-- Auto-Save Indicator -->
+      <div
+        v-if="petStore.isSaving"
+        class="auto-save-indicator"
+        role="status"
+        aria-live="polite"
+        aria-label="Game saved"
+      >
+        <div class="save-dot"></div>
+      </div>
     </div>
 
     <!-- Revive Overlay (full screen, shown when pet is dead) -->
