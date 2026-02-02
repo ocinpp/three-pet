@@ -145,6 +145,11 @@
 
     <!-- In-App Notifications -->
     <AppNotifications />
+
+    <!-- Toast Notification -->
+    <div v-if="toastMessage" :class="['notification-toast', { show: toastVisible }]">
+      {{ toastMessage }}
+    </div>
   </div>
 </template>
 
@@ -157,6 +162,11 @@ import AppNotifications from './components/AppNotifications.vue'
 
 const petStore = usePetStore()
 const notificationStore = useNotificationStore()
+
+// Toast state
+const toastMessage = ref('')
+const toastVisible = ref(false)
+let toastTimer: number | null = null
 
 // Time of day tracking
 type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night'
@@ -238,23 +248,29 @@ async function requestNotificationPermission() {
 }
 
 function showToast(message: string) {
-  const existingToast = document.querySelector('.notification-toast')
-  if (existingToast) {
-    existingToast.remove()
+  // Clear any existing toast timer
+  if (toastTimer !== null) {
+    clearTimeout(toastTimer)
   }
 
-  const toast = document.createElement('div')
-  toast.className = 'notification-toast'
-  toast.textContent = message
-  document.body.appendChild(toast)
+  // Set message and hide initially
+  toastMessage.value = message
+  toastVisible.value = false
 
+  // Show toast after a brief delay (for animation)
   setTimeout(() => {
-    toast.classList.add('show')
+    toastVisible.value = true
   }, 10)
 
-  setTimeout(() => {
-    toast.classList.remove('show')
-    setTimeout(() => toast.remove(), 300)
+  // Hide after 5 seconds
+  toastTimer = window.setTimeout(() => {
+    toastVisible.value = false
+    // Clear message after animation completes
+    setTimeout(() => {
+      if (!toastVisible.value) {
+        toastMessage.value = ''
+      }
+    }, 300)
   }, 5000)
 }
 
@@ -852,27 +868,32 @@ onUnmounted(() => {
 /* Toast Notification */
 .notification-toast {
   position: fixed;
-  top: 20px;
+  bottom: 30px;
   left: 50%;
-  transform: translateX(-50%) translateY(-100px);
-  background: rgba(0, 0, 0, 0.85);
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
   color: #fff;
-  padding: 12px 20px;
-  border-radius: 24px;
+  padding: 16px 24px;
+  border-radius: 12px;
   font-family: 'Outfit', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  z-index: 1000;
+  z-index: 9999;
   opacity: 0;
-  transition: all 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    bottom 0.3s ease;
   max-width: 90vw;
+  max-width: 400px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
 }
 
 .notification-toast.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  bottom: 40px;
+  pointer-events: auto;
 }
 
 /* Notification Indicator */

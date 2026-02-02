@@ -151,6 +151,12 @@ src/
 - **Hybrid approach**: Browser notifications (when supported) + in-app fallback
 - **Primary**: Browser Notification API for desktop and Android Chrome
 - **Fallback**: In-app notifications (iOS Safari, permission denied, unsupported browsers)
+- **Toast Notifications** (App.vue):
+  - Bottom-centered toast messages for user feedback
+  - Implemented with Vue reactive state (`toastMessage`, `toastVisible`)
+  - Positioned at bottom: 30px, slides up to 40px when shown
+  - Auto-dismiss after 5 seconds
+  - **Important**: Uses `v-if` in template (not `document.createElement()`) to ensure scoped styles apply
 - **In-App Component** (`AppNotifications.vue`):
   - Slide-in notification cards with type-specific colors and icons
   - Auto-dismiss after 5 minutes (300,000ms)
@@ -308,6 +314,44 @@ Key constants for gameplay tuning:
 #### Vue Watchers vs Computed
 - Use `computed` for derived state (mood, evolution type)
 - Use `watch` for side effects (Three.js scene updates, notifications)
+
+#### Scoped Styles Gotcha
+**Important**: Vue scoped styles (`<style scoped>`) only apply to elements in the component's template.
+They do NOT apply to dynamically created DOM elements via `document.createElement()`.
+
+**Problem:**
+```javascript
+// ❌ Scoped styles won't apply!
+const toast = document.createElement('div')
+toast.className = 'notification-toast'
+document.body.appendChild(toast)
+```
+
+**Solution:**
+```vue
+<!-- ✅ Use template instead -->
+<template>
+  <div v-if="toastMessage" class="notification-toast">
+    {{ toastMessage }}
+  </div>
+</template>
+
+<script setup lang="ts">
+const toastMessage = ref('')
+const toastVisible = ref(false)
+
+function showToast(message: string) {
+  toastMessage.value = message
+  toastVisible.value = true
+}
+</script>
+```
+
+**Why this matters:**
+- Scoped styles add unique data attributes to template elements
+- Dynamically created elements don't get these attributes
+- Styles with `[data-v-xxx]` selectors won't match dynamic elements
+- Always use reactive state for temporary UI elements (modals, toasts, dialogs)
 
 #### Three.js Lifecycle
 - Initialize in `onMounted()` after DOM is ready
