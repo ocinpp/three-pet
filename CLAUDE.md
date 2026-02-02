@@ -270,7 +270,7 @@ src/
 
 Key constants for gameplay tuning:
 - `GROWTH_TIMING`: Age thresholds for evolution (30s, 90s, 210s, 390s)
-- `DECAY_RATES`: Stat decrease per tick (hunger: 0.5, happiness: 0.3, energy: 0.2)
+- `DECAY_RATES`: Stat decrease per tick (hunger: 0.25, happiness: 0.15, energy: 0.1)
 - `THRESHOLDS`: Trigger levels for low stats, mood changes
 - `EVOLUTION_QUALITY`: Minimum average stats for perfect/good/normal evolution
 - `ACTIONS`: Amount restored by feed/play actions

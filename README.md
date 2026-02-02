@@ -112,8 +112,18 @@ Your pet shows different moods with unique colors:
    - Press **C** to clean poop (+10 happiness) or put pet to sleep/wake up
    - While sleeping, pet restores energy (+2/sec)
 3. **Watch Stats Decay**:
-   - Hunger -0.5/sec | Happiness -0.3/sec | Energy -0.2/sec
-   - Health decreases if any stat drops below 30%
+
+   ┌───────────┬────────────┬─────────────────────────┐
+   │   Stat    │ Decay Rate │ Time to Empty (100→0)   │
+   ├───────────┼────────────┼─────────────────────────┤
+   │ Hunger    │ 0.25/sec   │ 400 seconds (6.7 min)   │
+   ├───────────┼────────────┼─────────────────────────┤
+   │ Happiness │ 0.15/sec   │ 667 seconds (11.1 min)  │
+   ├───────────┼────────────┼─────────────────────────┤
+   │ Energy    │ 0.1/sec    │ 1000 seconds (16.7 min) │
+   └───────────┴────────────┴─────────────────────────┘
+
+   Health decreases if any stat drops below 30%
    - Too much poop (3+) makes pet sick faster!
 4. **Evolution Timeline**:
    - 🥚 Egg: 0-30 seconds
@@ -355,10 +365,10 @@ export const GROWTH_TIMING = {
 Edit `src/constants/pet.ts`:
 ```javascript
 export const DECAY_RATES = {
-  HUNGER: 0.5,      // Hunger per second
-  HAPPINESS: 0.3,   // Happiness per second
-  ENERGY: 0.2,      // Energy per second
-  HEALTH_DECAY: 2,  // Health damage when neglected
+  HUNGER: 0.25,     // Hunger per second (6.7 min to empty)
+  HAPPINESS: 0.15,  // Happiness per second (11 min to empty)
+  ENERGY: 0.1,      // Energy per second (16.7 min to empty)
+  HEALTH_DECAY: 1,  // Health damage when neglected
   HEALTH_REGEN: 0.5 // Health recovery
 }
 ```
