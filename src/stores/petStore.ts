@@ -49,6 +49,9 @@ export const usePetStore = defineStore('pet', () => {
   const lastActiveTime = ref(Date.now())
   const notificationEnabled = ref(false)
 
+  // Auto-save indicator state
+  const isSaving = ref(false)
+
   // Track last notification for each type to avoid spam
   const lastNotificationTime = ref<Record<string, number>>({
     hungry: 0,
@@ -195,6 +198,14 @@ export const usePetStore = defineStore('pet', () => {
     localStorage.setItem('three-pet-state', JSON.stringify(state))
   }
 
+  // Trigger auto-save indicator
+  function triggerAutoSaveIndicator() {
+    isSaving.value = true
+    setTimeout(() => {
+      isSaving.value = false
+    }, 1000)
+  }
+
   // Load state from localStorage
   function loadState(): boolean {
     const saved = localStorage.getItem('three-pet-state')
@@ -328,6 +339,7 @@ export const usePetStore = defineStore('pet', () => {
     happiness.value = Math.min(100, happiness.value + ACTIONS.FEED_HAPPINESS)
     currentAction.value = 'eating'
     setTimeout(() => (currentAction.value = 'idle'), ACTIONS.ACTION_DURATION)
+    saveState()
   }
 
   function play() {
@@ -338,6 +350,7 @@ export const usePetStore = defineStore('pet', () => {
     hunger.value = Math.max(0, hunger.value - ACTIONS.PLAY_HUNGER_COST)
     currentAction.value = 'playing'
     setTimeout(() => (currentAction.value = 'idle'), ACTIONS.ACTION_DURATION)
+    saveState()
   }
 
   function sleep() {
@@ -349,12 +362,14 @@ export const usePetStore = defineStore('pet', () => {
       // Go to sleep
       isSleeping.value = true
     }
+    saveState()
   }
 
   function clean() {
     if (!isAlive.value) return
     poopCount.value = 0
     happiness.value = Math.min(100, happiness.value + 10)
+    saveState()
   }
 
   function revive() {
@@ -372,6 +387,7 @@ export const usePetStore = defineStore('pet', () => {
     poopCount.value = 0
     totalCareScore.value = 0
     careSamples.value = 0
+    saveState()
   }
 
   function reset() {
@@ -570,6 +586,7 @@ export const usePetStore = defineStore('pet', () => {
     // Periodic auto-save as backup
     autoSaveInterval = window.setInterval(() => {
       saveState()
+      triggerAutoSaveIndicator()
       console.log('Auto-saved state')
     }, AUTO_SAVE.INTERVAL)
   })
@@ -603,6 +620,7 @@ export const usePetStore = defineStore('pet', () => {
     currentAction,
     isSleeping,
     poopCount,
+    isSaving,
     mood,
     notificationEnabled,
     feed,

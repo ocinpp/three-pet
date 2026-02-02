@@ -114,6 +114,11 @@
       </div>
     </div>
 
+    <!-- Auto-Save Indicator -->
+    <div v-if="petStore.isSaving" class="auto-save-indicator">
+      <div class="save-dot"></div>
+    </div>
+
     <!-- Revive Overlay (full screen, shown when pet is dead) -->
     <div v-if="!petStore.isAlive" class="revive-overlay">
       <button @click="petStore.revive()" class="revive-btn">
@@ -942,6 +947,40 @@ onUnmounted(() => {
 
 .notification-indicator {
   animation: pulse 1.5s infinite;
+}
+
+/* Auto-Save Indicator */
+.auto-save-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.save-dot {
+  width: 8px;
+  height: 8px;
+  background: #4caf50;
+  border-radius: 50%;
+  animation: flashSave 1s ease-out;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+}
+
+@keyframes flashSave {
+  0% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
 }
 
 /* Responsive */
