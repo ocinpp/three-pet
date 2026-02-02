@@ -65,6 +65,7 @@ export const usePetStore = defineStore('pet', () => {
 
   let tickInterval: number | null = null
   let autoSaveInterval: number | null = null
+  let saveIndicatorTimer: number | null = null
 
   // Request notification permission
   async function requestNotificationPermission(): Promise<boolean> {
@@ -207,8 +208,12 @@ export const usePetStore = defineStore('pet', () => {
   // Trigger auto-save indicator
   function triggerAutoSaveIndicator() {
     isSaving.value = true
-    setTimeout(() => {
+    if (saveIndicatorTimer !== null) {
+      clearTimeout(saveIndicatorTimer)
+    }
+    saveIndicatorTimer = window.setTimeout(() => {
       isSaving.value = false
+      saveIndicatorTimer = null
     }, AUTO_SAVE.INDICATOR_DURATION)
   }
 
@@ -614,6 +619,9 @@ export const usePetStore = defineStore('pet', () => {
     }
     if (autoSaveInterval !== null) {
       clearInterval(autoSaveInterval)
+    }
+    if (saveIndicatorTimer !== null) {
+      clearTimeout(saveIndicatorTimer)
     }
     document.removeEventListener('visibilitychange', handleVisibilityChange)
     window.removeEventListener('beforeunload', saveState)
