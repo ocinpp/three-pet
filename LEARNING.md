@@ -159,6 +159,59 @@ onUnmounted(() => {
 })
 ```
 
+### Scoped Styles Gotcha (Important!)
+
+**Vue scoped styles only apply to elements in the component's template.**
+They do NOT apply to dynamically created DOM elements via `document.createElement()`.
+
+**Problem:**
+```javascript
+// ❌ Scoped styles won't apply!
+const toast = document.createElement('div')
+toast.className = 'notification-toast'
+document.body.appendChild(toast)
+```
+
+**Solution: Use reactive state in template**
+```vue
+<template>
+  <!-- ✅ Scoped styles work -->
+  <div v-if="toastMessage" class="notification-toast">
+    {{ toastMessage }}
+  </div>
+</template>
+
+<script setup lang="ts">
+const toastMessage = ref('')
+const toastVisible = ref(false)
+
+function showToast(message: string) {
+  toastMessage.value = message
+  toastVisible.value = false
+  setTimeout(() => toastVisible.value = true, 10)
+}
+</script>
+
+<style scoped>
+.notification-toast {
+  /* These styles will apply! */
+  position: fixed;
+  bottom: 30px;
+  /* ... */
+}
+</style>
+```
+
+**Why this happens:**
+- Vue adds unique data attributes (like `data-v-xxx`) to template elements
+- Scoped styles use these attributes: `.notification-toast[data-v-xxx]`
+- Dynamically created elements don't get these attributes
+- Styles won't match!
+
+**When to use dynamic DOM:**
+- Use reactive state for: toasts, modals, dialogs, popovers
+- Use `document.createElement()` only when: integrating third-party libraries that require it
+
 ---
 
 ## Pinia State Management
@@ -1207,6 +1260,59 @@ autoSaveInterval = setInterval(() => {
 - Vue applies classes automatically to list items
 - Items slide in from right, slide out to right
 - `TransitionGroup` handles enter/leave transitions
+
+### Toast Notification (Bottom Slide-Up)
+
+```css
+.notification-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  color: #fff;
+  padding: 16px 24px;
+  border-radius: 12px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease, bottom 0.3s ease;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.notification-toast.show {
+  opacity: 1;
+  bottom: 40px;
+}
+```
+
+**How it works:**
+- Fixed positioning at bottom center
+- `left: 50%` + `transform: translateX(-50%)` centers horizontally
+- Slides up from `bottom: 30px` to `bottom: 40px` when shown
+- High `z-index` ensures it appears above all other elements
+- Smooth transitions on both opacity and position
+
+**Vue integration:**
+```vue
+<template>
+  <div v-if="toastMessage" :class="['notification-toast', { show: toastVisible }]">
+    {{ toastMessage }}
+  </div>
+</template>
+
+<script setup lang="ts">
+const toastMessage = ref('')
+const toastVisible = ref(false)
+
+function showToast(message: string) {
+  toastMessage.value = message
+  toastVisible.value = false // Start hidden
+  setTimeout(() => toastVisible.value = true, 10) // Show after 10ms
+}
+</script>
+```
 
 ---
 

@@ -56,6 +56,10 @@ A modern 3D voxel pet game built with Vue 3, Three.js, and Pinia. Experience rai
   - **Fallback**: In-app notifications (iOS Safari, permission denied, unsupported browsers)
   - **Visual indicator**: 🔔 Bell icon with unread count (pulsing animation)
   - Only triggers when tab is inactive (won't annoy you while playing)
+- **Toast Notifications**: Bottom-centered toast messages for user feedback
+  - Helpful messages when notifications are unavailable or blocked
+  - Smooth slide-up animation
+  - Auto-dismiss after 5 seconds
 - **Cooldown System** - Prevents notification spam (1 minute per type)
 - **Smart Detection**: "Enable Alerts" button automatically hidden on iOS Safari where browser notifications aren't supported
 - **In-App Notifications**: Beautiful slide-in cards with colors and icons for each notification type
