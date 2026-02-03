@@ -161,11 +161,83 @@
     <div v-if="toastMessage" :class="['notification-toast', { show: toastVisible }]">
       {{ toastMessage }}
     </div>
+
+    <!-- Debug Button -->
+    <button @click="showDebugModal = true" class="debug-btn" aria-label="Debug">
+      <span class="debug-icon">🐛</span>
+    </button>
+
+    <!-- Debug Modal -->
+    <div v-if="showDebugModal" class="debug-modal-overlay" @click.self="showDebugModal = false">
+      <div class="debug-modal">
+        <div class="debug-modal-header">
+          <h3>Debug Info</h3>
+          <button @click="showDebugModal = false" class="debug-close-btn" aria-label="Close">
+            ×
+          </button>
+        </div>
+        <div class="debug-modal-content">
+          <div class="debug-section">
+            <h4>localStorage Data</h4>
+            <pre class="debug-json">{{ debugData }}</pre>
+          </div>
+          <div class="debug-section">
+            <h4>Parsed State</h4>
+            <div class="debug-state">
+              <div class="debug-state-row">
+                <span class="debug-label">Life Stage:</span>
+                <span class="debug-value">{{ petStore.lifeStage }}</span>
+              </div>
+              <div class="debug-state-row">
+                <span class="debug-label">Age:</span>
+                <span class="debug-value">{{ petStore.age }}s</span>
+              </div>
+              <div class="debug-state-row">
+                <span class="debug-label">Hunger:</span>
+                <span class="debug-value">{{ Math.round(petStore.hunger) }}%</span>
+              </div>
+              <div class="debug-state-row">
+                <span class="debug-label">Happiness:</span>
+                <span class="debug-value">{{ Math.round(petStore.happiness) }}%</span>
+              </div>
+              <div class="debug-state-row">
+                <span class="debug-label">Health:</span>
+                <span class="debug-value">{{ Math.round(petStore.health) }}%</span>
+              </div>
+              <div class="debug-state-row">
+                <span class="debug-label">Energy:</span>
+                <span class="debug-value">{{ Math.round(petStore.energy) }}%</span>
+              </div>
+              <div class="debug-state-row">
+                <span class="debug-label">Is Alive:</span>
+                <span class="debug-value">{{ petStore.isAlive }}</span>
+              </div>
+              <div class="debug-state-row">
+                <span class="debug-label">Is Sleeping:</span>
+                <span class="debug-value">{{ petStore.isSleeping }}</span>
+              </div>
+              <div class="debug-state-row">
+                <span class="debug-label">Poop Count:</span>
+                <span class="debug-value">{{ petStore.poopCount }}</span>
+              </div>
+              <div class="debug-state-row">
+                <span class="debug-label">Evolution:</span>
+                <span class="debug-value">{{ petStore.evolutionType }}</span>
+              </div>
+              <div class="debug-state-row">
+                <span class="debug-label">Last Active:</span>
+                <span class="debug-value">{{ formatLastActiveTime() }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { usePetStore } from './stores/petStore'
 import { useNotificationStore } from './stores/notificationStore'
 import PetScene from './components/PetScene.vue'
@@ -178,6 +250,38 @@ const notificationStore = useNotificationStore()
 const toastMessage = ref('')
 const toastVisible = ref(false)
 let toastTimer: number | null = null
+
+// Debug state
+const showDebugModal = ref(false)
+
+// Get localStorage data as formatted JSON
+const debugData = computed(() => {
+  try {
+    const data = localStorage.getItem('three-pet-state')
+    if (!data) return 'No saved state found in localStorage'
+    const parsed = JSON.parse(data)
+    return JSON.stringify(parsed, null, 2)
+  } catch (e) {
+    return `Error reading localStorage: ${e instanceof Error ? e.message : String(e)}`
+  }
+})
+
+function formatLastActiveTime(): string {
+  try {
+    const data = localStorage.getItem('three-pet-state')
+    if (!data) return 'N/A'
+    const parsed = JSON.parse(data)
+    const lastActive = parsed.lastActiveTime
+    if (!lastActive) return 'N/A'
+    const date = new Date(lastActive)
+    const now = Date.now()
+    const diffMs = now - lastActive
+    const diffMins = Math.floor(diffMs / 60000)
+    return `${date.toLocaleTimeString()} (${diffMins}m ago)`
+  } catch {
+    return 'Error'
+  }
+}
 
 // Time of day tracking
 type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night'
@@ -1002,5 +1106,207 @@ onUnmounted(() => {
   .control-panel {
     padding-top: 12px;
   }
+}
+
+/* Debug Button */
+.debug-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  z-index: 50;
+}
+
+.debug-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
+}
+
+.debug-btn:active {
+  transform: scale(0.95);
+}
+
+.debug-icon {
+  font-size: 1.5rem;
+}
+
+/* Debug Modal */
+.debug-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.debug-modal {
+  background: #1a1a1a;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+}
+
+.debug-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #333;
+  background: #252525;
+}
+
+.debug-modal-header h3 {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.debug-close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.debug-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.debug-modal-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.debug-section {
+  margin-bottom: 20px;
+}
+
+.debug-section:last-child {
+  margin-bottom: 0;
+}
+
+.debug-section h4 {
+  margin: 0 0 12px 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffd54f;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.debug-json {
+  background: #0d0d0d;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: #4caf50;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.debug-state {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.debug-state-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #252525;
+  border-radius: 6px;
+  border: 1px solid #333;
+}
+
+.debug-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #bbb;
+}
+
+.debug-value {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #4caf50;
+  font-weight: 600;
+}
+
+/* Scrollbar styles for debug modal */
+.debug-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.debug-modal-content::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.debug-modal-content::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+.debug-modal-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.debug-json::-webkit-scrollbar {
+  height: 8px;
+}
+
+.debug-json::-webkit-scrollbar-track {
+  background: #0d0d0d;
+  border-radius: 4px;
+}
+
+.debug-json::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+.debug-json::-webkit-scrollbar-thumb:hover {
+  background: #444;
 }
 </style>
