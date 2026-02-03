@@ -245,7 +245,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { usePetStore } from './stores/petStore'
 import { useNotificationStore } from './stores/notificationStore'
 import PetScene from './components/PetScene.vue'
@@ -306,6 +306,13 @@ function formatLastActiveTime(): string {
     return 'Error'
   }
 }
+
+// Auto-refresh debug data when modal opens
+watch(showDebugModal, (isOpen) => {
+  if (isOpen) {
+    refreshDebugData()
+  }
+})
 
 // Time of day tracking
 type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night'
