@@ -168,17 +168,25 @@
     </button>
 
     <!-- Debug Modal -->
-    <div v-if="showDebugModal" class="debug-modal-overlay" @click.self="showDebugModal = false">
+    <div
+      v-if="showDebugModal"
+      class="debug-modal-overlay"
+      @click.self="closeDebugModal"
+      @keydown.esc="closeDebugModal"
+    >
       <div class="debug-modal">
         <div class="debug-modal-header">
           <h3>Debug Info</h3>
-          <button @click="showDebugModal = false" class="debug-close-btn" aria-label="Close">
-            ×
-          </button>
+          <button @click="closeDebugModal" class="debug-close-btn" aria-label="Close">×</button>
         </div>
         <div class="debug-modal-content">
           <div class="debug-section">
-            <h4>localStorage Data</h4>
+            <div class="debug-section-header">
+              <h4>localStorage Data</h4>
+              <button @click="refreshDebugData" class="debug-refresh-btn" aria-label="Refresh data">
+                <span class="debug-refresh-icon">🔄</span>
+              </button>
+            </div>
             <pre class="debug-json">{{ debugData }}</pre>
           </div>
           <div class="debug-section">
@@ -253,9 +261,14 @@ let toastTimer: number | null = null
 
 // Debug state
 const showDebugModal = ref(false)
+const debugRefreshCounter = ref(0)
 
 // Get localStorage data as formatted JSON
 const debugData = computed(() => {
+  // Use refreshCounter to force recomputation when refresh button is clicked
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  debugRefreshCounter.value
+
   try {
     const data = localStorage.getItem('three-pet-state')
     if (!data) return 'No saved state found in localStorage'
@@ -265,6 +278,14 @@ const debugData = computed(() => {
     return `Error reading localStorage: ${e instanceof Error ? e.message : String(e)}`
   }
 })
+
+function closeDebugModal() {
+  showDebugModal.value = false
+}
+
+function refreshDebugData() {
+  debugRefreshCounter.value++
+}
 
 function formatLastActiveTime(): string {
   try {
@@ -277,6 +298,9 @@ function formatLastActiveTime(): string {
     const now = Date.now()
     const diffMs = now - lastActive
     const diffMins = Math.floor(diffMs / 60000)
+    const diffSecs = Math.floor(diffMs / 1000)
+
+    if (diffSecs < 60) return 'Just now'
     return `${date.toLocaleTimeString()} (${diffMins}m ago)`
   } catch {
     return 'Error'
@@ -1204,6 +1228,11 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.debug-close-btn:focus-visible {
+  outline: 2px solid #4caf50;
+  outline-offset: 2px;
+}
+
 .debug-modal-content {
   padding: 20px;
   overflow-y: auto;
@@ -1228,6 +1257,47 @@ onUnmounted(() => {
   letter-spacing: 0.05em;
 }
 
+.debug-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.debug-section-header h4 {
+  margin: 0;
+}
+
+.debug-refresh-btn {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid #4caf50;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  height: 28px;
+  width: 28px;
+}
+
+.debug-refresh-btn:hover {
+  background: rgba(76, 175, 80, 0.3);
+  transform: rotate(180deg);
+}
+
+.debug-refresh-btn:focus-visible {
+  outline: 2px solid #4caf50;
+  outline-offset: 2px;
+}
+
+.debug-refresh-icon {
+  font-size: 0.9rem;
+  display: block;
+}
+
 .debug-json {
   background: #0d0d0d;
   border: 1px solid #333;
@@ -1239,7 +1309,7 @@ onUnmounted(() => {
   color: #4caf50;
   overflow-x: auto;
   white-space: pre-wrap;
-  word-break: break-all;
+  overflow-wrap: break-word;
   line-height: 1.4;
 }
 
